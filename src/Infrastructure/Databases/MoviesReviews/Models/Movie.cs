@@ -1,0 +1,11 @@
+namespace CleanModelContextProtocol.Infrastructure.Databases.MoviesReviews.Models;
+
+using System.Diagnostics.CodeAnalysis;
+
+[ExcludeFromCodeCoverage]
+internal record Movie : Entity
+{
+    public required string Title { get; init; }
+
+    public ICollection<Review> Reviews { get; init; } = [];
+}

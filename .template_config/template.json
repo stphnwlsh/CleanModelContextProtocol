@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "Stephen Walsh",
+  "classifications": [
+    "Clean Architecture",
+    "Clean",
+    "Model Context Protocol",
+    "ModelContextProtocol",
+    "MCP",
+    "Dotnet",
+    "Docker"
+  ],
+  "identity": "CleanModelContextProtocol.Template",
+  "name": "Clean Model Context Protocol Template",
+  "shortName": "cleanmodelcontextprotocol",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "CleanModelContextProtocol",
+  "preferNameDirectory": true,
+  "symbols": {
+    "author": {
+      "type": "parameter",
+      "displayName": "The name of the author of the solution.",
+      "defaultValue": "Stephen Walsh",
+      "replaces": "Stephen Walsh"
+    }
+  }
+}
