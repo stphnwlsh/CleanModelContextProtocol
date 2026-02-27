@@ -1,4 +1,4 @@
-namespace CleanModelContextProtocol.Infrastructure.Databases.MoviesReviews;
+namespace CleanModelContextProtocol.Infrastructure.Databases.MovieReviews;
 
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;

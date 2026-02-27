@@ -6,5 +6,5 @@ using Application.Movies.Entities;
 public record Review(
     Guid Id,
     int Stars,
-    ReviewedMovie ReviewedMovie = default,
-    ReviewAuthor ReviewAuthor = default);
+    ReviewedMovie ReviewedMovie = null,
+    ReviewAuthor ReviewAuthor = null);

@@ -1,4 +1,4 @@
-namespace CleanModelContextProtocol.Infrastructure.Databases.MoviesReviews.Models;
+namespace CleanModelContextProtocol.Infrastructure.Databases.MovieReviews.Models;
 
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;

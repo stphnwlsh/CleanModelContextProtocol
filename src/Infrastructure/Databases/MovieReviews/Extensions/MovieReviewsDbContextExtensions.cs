@@ -1,4 +1,4 @@
-namespace CleanModelContextProtocol.Infrastructure.Databases.MoviesReviews.Extensions;
+namespace CleanModelContextProtocol.Infrastructure.Databases.MovieReviews.Extensions;
 
 using System;
 using Bogus;

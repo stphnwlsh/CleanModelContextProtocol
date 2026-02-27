@@ -1,4 +1,4 @@
-namespace CleanModelContextProtocol.Infrastructure.Databases.MoviesReviews.Mapping;
+namespace CleanModelContextProtocol.Infrastructure.Databases.MovieReviews.Mapping;
 
 using AutoMapper;
 using Application = Application.Authors.Entities;

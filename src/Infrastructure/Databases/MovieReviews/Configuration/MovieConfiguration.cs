@@ -1,4 +1,4 @@
-namespace CleanModelContextProtocol.Infrastructure.Databases.MoviesReviews.Configuration;
+namespace CleanModelContextProtocol.Infrastructure.Databases.MovieReviews.Configuration;
 
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Models;

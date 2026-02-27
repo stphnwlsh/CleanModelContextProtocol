@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <VersionPrefix>1.2.3.4</VersionPrefix>
     <VersionSuffix>Test</VersionSuffix>
     <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
