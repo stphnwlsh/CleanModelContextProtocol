@@ -23,7 +23,7 @@ services:
       environment:
         ACCEPT_EULA: Y
       networks:
-        - cleanwebapi_network
+        - cleanmodelcontextprotocol_network
 networks:
-  cleanwebapi_network:
+  cleanmodelcontextprotocol_network:
     driver: bridge
