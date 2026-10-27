@@ -1,6 +1,6 @@
 namespace CleanModelContextProtocol.Application.Reviews.Commands.DeleteReview;
 
-using MediatR;
+using Mediator;
 
 public class DeleteReviewCommand : IRequest<bool>
 {

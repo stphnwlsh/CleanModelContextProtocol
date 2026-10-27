@@ -1,9 +1,8 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Tools;
 
 using CleanModelContextProtocol.Presentation.Tools;
-using MediatR;
+using Mediator;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
 using Xunit;
 using Entities = Application.Versions.Entities;
@@ -31,22 +30,5 @@ public class VersionToolTests
         // Assert
         response.ShouldContain("| File Version | 1.2.3.4 |");
         response.ShouldContain("| Informational Version | 5.6.7.8 |");
-    }
-
-    [Fact]
-    public async Task GetVersion_ShouldReturn_Error()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Queries.GetVersion.GetVersionQuery>())
-            .Throws(new ArgumentException("Expected Exception"));
-
-        // Act
-        var response = await VersionTools.GetVersion(sender);
-
-        // Assert
-        response.ShouldBe("Error: Expected Exception");
     }
 }

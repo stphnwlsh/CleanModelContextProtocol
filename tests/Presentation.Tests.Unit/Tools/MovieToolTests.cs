@@ -1,11 +1,9 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Tools;
 
 using System.Text.Json;
-using CleanModelContextProtocol.Application.Common.Exceptions;
 using CleanModelContextProtocol.Presentation.Tools;
-using MediatR;
+using Mediator;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
 using Xunit;
 using Entities = Application.Movies.Entities;
@@ -41,23 +39,6 @@ public class MovieToolTests
     }
 
     [Fact]
-    public async Task GetAllMovies_ShouldReturn_Error()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Queries.GetMovies.GetMoviesQuery>())
-            .Throws(new ArgumentException("Expected Exception"));
-
-        // Act
-        var response = await MovieTools.GetAllMovies(sender);
-
-        // Assert
-        response.ShouldBe("Error: Expected Exception");
-    }
-
-    [Fact]
     public async Task GetMovieById_ShouldReturn_JsonResult()
     {
         // Arrange
@@ -77,39 +58,5 @@ public class MovieToolTests
         result.Id.ShouldBe(Guid.Empty);
         result.Title.ShouldBe("Lorem Ipsum");
         result.Reviews.ShouldBeNull();
-    }
-
-    [Fact]
-    public async Task GetMovieById_ShouldReturn_NotFound()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Queries.GetMovieById.GetMovieByIdQuery>())
-            .Throws(new NotFoundException("Expected Exception"));
-
-        // Act
-        var response = await MovieTools.GetMovieById(sender, Guid.Empty);
-
-        // Assert
-        response.ShouldBe("Not Found: Expected Exception");
-    }
-
-    [Fact]
-    public async Task GetMovieById_ShouldReturn_Error()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Queries.GetMovieById.GetMovieByIdQuery>())
-            .Throws(new ArgumentException("Expected Exception"));
-
-        // Act
-        var response = await MovieTools.GetMovieById(sender, Guid.Empty);
-
-        // Assert
-        response.ShouldBe("Error: Expected Exception");
     }
 }
