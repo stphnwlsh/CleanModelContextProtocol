@@ -5,8 +5,8 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application;
+using CleanModelContextProtocol.Presentation.Errors;
 using CleanModelContextProtocol.Presentation.Serialization;
-using FluentValidation;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Json;
@@ -46,14 +46,9 @@ public static class WebApplicationBuilderExtensions
 
         #endregion Serialisation
 
-        #region Validation
-
-        _ = builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Singleton);
-
-        #endregion Validation
-
         #region Project Dependencies
 
+        _ = builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
         _ = builder.Services.AddInfrastructure();
         _ = builder.Services.AddApplication();
 
@@ -88,7 +83,8 @@ public static class WebApplicationBuilderExtensions
                     "that data for better formatting.";
             })
             .WithHttpTransport()
-            .WithToolsFromAssembly();
+            .WithToolsFromAssembly()
+            .WithRequestFilters(filters => filters.AddCallToolFilter(ToolErrorFilter.Filter));
 
         #endregion Model Context Protocol
 

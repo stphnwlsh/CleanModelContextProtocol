@@ -79,28 +79,45 @@ public class AuthorToolTests : BaseToolTests
         }
     }
 
+    [Fact]
+    public async Task GetAuthorById_WithEmptyId_ShouldReturn_ValidationError()
+    {
+        // Act
+        var result = await this.Client.CallToolAsync("GetAuthorById",
+            new Dictionary<string, object> { ["id"] = Guid.Empty });
+        var text = result.Content.OfType<TextContentBlock>().First().Text;
+
+        // Assert
+        result.IsError.ShouldBe(true);
+        text.ShouldBe("Validation Failed: Id: An Author Id was not supplied.");
+    }
+
+    [Fact]
+    public async Task GetAuthorById_WithUnknownId_ShouldReturn_NotFoundError()
+    {
+        // Act
+        var result = await this.Client.CallToolAsync("GetAuthorById",
+            new Dictionary<string, object> { ["id"] = Guid.NewGuid() });
+        var text = result.Content.OfType<TextContentBlock>().First().Text;
+
+        // Assert
+        result.IsError.ShouldBe(true);
+        text.ShouldBe("Not Found: The Author with the supplied id was not found.");
+    }
+
     [Theory]
-    [InlineData("00000000-0000-0000-0000-000000000000")]
     [InlineData("1")]
     [InlineData("fake")]
     public async Task GetAuthorById_WithInvalidId_ShouldReturn_Error(string input)
     {
-        // Valid-format GUIDs (including empty) pass as Guid; unparseable strings pass as string
-        object idArg = Guid.TryParse(input, out var guid) ? guid : input;
-
         try
         {
             // Act
             var result = await this.Client.CallToolAsync("GetAuthorById",
-                new Dictionary<string, object> { ["id"] = idArg });
+                new Dictionary<string, object> { ["id"] = input });
 
-            // Assert - empty GUID returns "Not Found:" text; binding errors may set IsError
-            var isError = result.IsError == true;
-            var textContent = result.Content.OfType<TextContentBlock>().FirstOrDefault()?.Text ?? string.Empty;
-            var isTextError = textContent.StartsWith("Not Found:", StringComparison.Ordinal)
-                || textContent.StartsWith("Error:", StringComparison.Ordinal);
-
-            (isError || isTextError).ShouldBeTrue();
+            // Assert
+            result.IsError.ShouldBe(true);
         }
         catch (McpException)
         {

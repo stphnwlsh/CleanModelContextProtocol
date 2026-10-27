@@ -3,11 +3,9 @@ namespace CleanModelContextProtocol.Presentation.Tests.Unit.Tools;
 using System.Text.Json;
 using Application.Authors.Entities;
 using Application.Movies.Entities;
-using CleanModelContextProtocol.Application.Common.Exceptions;
 using CleanModelContextProtocol.Presentation.Tools;
-using MediatR;
+using Mediator;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shouldly;
 using Xunit;
 using Commands = Application.Reviews.Commands;
@@ -54,23 +52,6 @@ public class ReviewToolTests
     }
 
     [Fact]
-    public async Task GetAllReviews_ShouldReturn_Error()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Queries.GetReviews.GetReviewsQuery>())
-            .Throws(new ArgumentException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.GetAllReviews(sender);
-
-        // Assert
-        response.ShouldBe("Error: Expected Exception");
-    }
-
-    [Fact]
     public async Task GetReviewById_ShouldReturn_JsonResult()
     {
         // Arrange
@@ -94,40 +75,6 @@ public class ReviewToolTests
         result.ReviewAuthor.LastName.ShouldBe("Ipsum");
         result.ReviewedMovie.Id.ShouldBe(Guid.Empty);
         result.ReviewedMovie.Title.ShouldBe("Lorem Ipsum");
-    }
-
-    [Fact]
-    public async Task GetReviewById_ShouldReturn_NotFound()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Queries.GetReviewById.GetReviewByIdQuery>())
-            .Throws(new NotFoundException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.GetReviewById(sender, Guid.Empty);
-
-        // Assert
-        response.ShouldBe("Not Found: Expected Exception");
-    }
-
-    [Fact]
-    public async Task GetReviewById_ShouldReturn_Error()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Queries.GetReviewById.GetReviewByIdQuery>())
-            .Throws(new ArgumentException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.GetReviewById(sender, Guid.Empty);
-
-        // Assert
-        response.ShouldBe("Error: Expected Exception");
     }
 
     [Fact]
@@ -157,40 +104,6 @@ public class ReviewToolTests
     }
 
     [Fact]
-    public async Task CreateReview_ShouldReturn_NotFound()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Commands.CreateReview.CreateReviewCommand>())
-            .Throws(new NotFoundException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.CreateReview(sender, Guid.Empty, Guid.Empty, 5);
-
-        // Assert
-        response.ShouldBe("Not Found: Expected Exception");
-    }
-
-    [Fact]
-    public async Task CreateReview_ShouldReturn_Error()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Commands.CreateReview.CreateReviewCommand>())
-            .Throws(new ArgumentException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.CreateReview(sender, Guid.Empty, Guid.Empty, 5);
-
-        // Assert
-        response.ShouldBe("Error: Expected Exception");
-    }
-
-    [Fact]
     public async Task UpdateReview_ShouldReturn_Success()
     {
         // Arrange
@@ -208,40 +121,6 @@ public class ReviewToolTests
     }
 
     [Fact]
-    public async Task UpdateReview_ShouldReturn_NotFound()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Commands.UpdateReview.UpdateReviewCommand>())
-            .Throws(new NotFoundException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.UpdateReview(sender, Guid.Empty, Guid.Empty, Guid.Empty, 5);
-
-        // Assert
-        response.ShouldBe("Not Found: Expected Exception");
-    }
-
-    [Fact]
-    public async Task UpdateReview_ShouldReturn_Error()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Commands.UpdateReview.UpdateReviewCommand>())
-            .Throws(new ArgumentException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.UpdateReview(sender, Guid.Empty, Guid.Empty, Guid.Empty, 5);
-
-        // Assert
-        response.ShouldBe("Error: Expected Exception");
-    }
-
-    [Fact]
     public async Task DeleteReview_ShouldReturn_Success()
     {
         // Arrange
@@ -256,39 +135,5 @@ public class ReviewToolTests
 
         // Assert
         response.ShouldBe("Review deleted successfully");
-    }
-
-    [Fact]
-    public async Task DeleteReview_ShouldReturn_NotFound()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Commands.DeleteReview.DeleteReviewCommand>())
-            .Throws(new NotFoundException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.DeleteReview(sender, Guid.Empty);
-
-        // Assert
-        response.ShouldBe("Not Found: Expected Exception");
-    }
-
-    [Fact]
-    public async Task DeleteReview_ShouldReturn_Error()
-    {
-        // Arrange
-        var sender = Substitute.For<ISender>();
-
-        _ = sender
-            .Send(Arg.Any<Commands.DeleteReview.DeleteReviewCommand>())
-            .Throws(new ArgumentException("Expected Exception"));
-
-        // Act
-        var response = await ReviewTools.DeleteReview(sender, Guid.Empty);
-
-        // Assert
-        response.ShouldBe("Error: Expected Exception");
     }
 }
