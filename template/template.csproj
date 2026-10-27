@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
     <PackageType>Template</PackageType>
-    <IsPackable>true</IsPackable>
     <PackageId>CleanModelContextProtocol.Template</PackageId>
     <Title>Clean Model Context Protocol Template</Title>
     <Authors>Stephen Walsh</Authors>
     <Description>A template for an API using a streamlined version of Clean Architecture and .NET Model Context Protocol.</Description>
-    <PackageTags>dotnet;api;csharp;template;clean;clean-architecture;model-context-protocol;modelcontextprotocol;mcp;</PackageTags>
+    <PackageTags>dotnet;api;csharp;template;clean;clean-architecture;model-context-protocol;modelcontextprotocol;mcp</PackageTags>
     <PackageProjectUrl>https://github.com/stphnwlsh/CleanModelContextProtocol</PackageProjectUrl>
     <RepositoryUrl>https://github.com/stphnwlsh/CleanModelContextProtocol</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -24,7 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="../**/*" Exclude="../**/bin/**;../**/obj/**;../**/*.user;../**/*.lock.json;../**/.DS_Store;../**/.git/**;../**/.github/**;../**/.vs/**;../LICENSE.md;../**/*.gitattributes;../NUGET.md;../README.md;../CONTRIBUTING.md;../CODE_OF_CONDUCT.md;../**/*.gitignore;../**/nuget.config;../template/**;../**/.dockerignore;../**/.editorconfig;../icon.png;" />
+    <Content Include="../**/*" Exclude="../**/bin/**;../**/obj/**;../**/*.user;../**/*.lock.json;../**/.DS_Store;../**/.git/**;../**/.github/**;../**/.vs/**;../LICENSE.md;../**/*.gitattributes;../NUGET.md;../README.md;../CONTRIBUTING.md;../CODE_OF_CONDUCT.md;../SECURITY.md;../SUPPORT.md;../docs/sponsor.jpg;../**/*.gitignore;../**/nuget.config;../template/**;../**/.dockerignore;../**/.editorconfig;../icon.png;" />
     <None Include="../icon.png" Pack="true" PackagePath="images/" />
     <None Include="../LICENSE.md" Pack="true" PackagePath="docs/" />
     <None Include="../NUGET.md" Pack="true" PackagePath="docs/" />
