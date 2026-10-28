@@ -1,5 +1,6 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Integration.Tools;
 
+using CleanModelContextProtocol.Presentation.Models;
 using Extensions;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
@@ -15,7 +16,7 @@ public class ReviewToolTests : BaseToolTests
     public async Task GetAllReviews_ShouldReturn_Reviews()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetAllReviews");
+        var result = await this.Client.CallToolAsync("reviews_list");
         var text = result.Content.OfType<TextContentBlock>().First().Text;
         var reviews = text.Deserialize<List<Entities.Review>>();
 
@@ -50,13 +51,13 @@ public class ReviewToolTests : BaseToolTests
     public async Task GetReviewById_ShouldReturn_Review()
     {
         // Arrange
-        var allResult = await this.Client.CallToolAsync("GetAllReviews");
+        var allResult = await this.Client.CallToolAsync("reviews_list");
         var allText = allResult.Content.OfType<TextContentBlock>().First().Text;
         var firstReview = allText.Deserialize<List<Entities.Review>>()[0];
 
         // Act
-        var result = await this.Client.CallToolAsync("GetReviewById",
-            new Dictionary<string, object> { ["id"] = firstReview.Id });
+        var result = await this.Client.CallToolAsync("reviews_get",
+            new Dictionary<string, object> { ["reviewId"] = firstReview.Id });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
         var review = text.Deserialize<Entities.Review>();
 
@@ -84,16 +85,16 @@ public class ReviewToolTests : BaseToolTests
     public async Task CreateReview_ShouldReturn_Review()
     {
         // Arrange
-        var authorResult = await this.Client.CallToolAsync("GetAllAuthors");
+        var authorResult = await this.Client.CallToolAsync("authors_list");
         var authorText = authorResult.Content.OfType<TextContentBlock>().First().Text;
         var author = authorText.Deserialize<List<AuthorEntities.Author>>()[0];
 
-        var movieResult = await this.Client.CallToolAsync("GetAllMovies");
+        var movieResult = await this.Client.CallToolAsync("movies_list");
         var movieText = movieResult.Content.OfType<TextContentBlock>().First().Text;
         var movie = movieText.Deserialize<List<MovieEntities.Movie>>()[0];
 
         // Act
-        var result = await this.Client.CallToolAsync("CreateReview",
+        var result = await this.Client.CallToolAsync("reviews_create",
             new Dictionary<string, object>
             {
                 ["authorId"] = author.Id,
@@ -121,26 +122,26 @@ public class ReviewToolTests : BaseToolTests
     }
 
     [Fact]
-    public async Task UpdateReview_ShouldReturn_Success()
+    public async Task UpdateReview_ShouldReturn_Review()
     {
         // Arrange
-        var authorResult = await this.Client.CallToolAsync("GetAllAuthors");
+        var authorResult = await this.Client.CallToolAsync("authors_list");
         var authorText = authorResult.Content.OfType<TextContentBlock>().First().Text;
         var author = authorText.Deserialize<List<AuthorEntities.Author>>()[0];
 
-        var movieResult = await this.Client.CallToolAsync("GetAllMovies");
+        var movieResult = await this.Client.CallToolAsync("movies_list");
         var movieText = movieResult.Content.OfType<TextContentBlock>().First().Text;
         var movie = movieText.Deserialize<List<MovieEntities.Movie>>()[0];
 
-        var reviewsResult = await this.Client.CallToolAsync("GetAllReviews");
+        var reviewsResult = await this.Client.CallToolAsync("reviews_list");
         var reviewsText = reviewsResult.Content.OfType<TextContentBlock>().First().Text;
         var existingReview = reviewsText.Deserialize<List<Entities.Review>>()[0];
 
         // Act
-        var result = await this.Client.CallToolAsync("UpdateReview",
+        var result = await this.Client.CallToolAsync("reviews_update",
             new Dictionary<string, object>
             {
-                ["id"] = existingReview.Id,
+                ["reviewId"] = existingReview.Id,
                 ["authorId"] = author.Id,
                 ["movieId"] = movie.Id,
                 ["stars"] = 5
@@ -148,12 +149,7 @@ public class ReviewToolTests : BaseToolTests
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
-        text.ShouldBe("Review updated successfully");
-
-        var validateResult = await this.Client.CallToolAsync("GetReviewById",
-            new Dictionary<string, object> { ["id"] = existingReview.Id });
-        var validateText = validateResult.Content.OfType<TextContentBlock>().First().Text;
-        var updatedReview = validateText.Deserialize<Entities.Review>();
+        var updatedReview = text.Deserialize<Entities.Review>();
 
         _ = updatedReview.ShouldNotBeNull();
 
@@ -171,23 +167,26 @@ public class ReviewToolTests : BaseToolTests
     }
 
     [Fact]
-    public async Task DeleteReview_ShouldReturn_Success()
+    public async Task DeleteReview_ShouldReturn_Result()
     {
         // Arrange
-        var reviewsResult = await this.Client.CallToolAsync("GetAllReviews");
+        var reviewsResult = await this.Client.CallToolAsync("reviews_list");
         var reviewsText = reviewsResult.Content.OfType<TextContentBlock>().First().Text;
         var existingReview = reviewsText.Deserialize<List<Entities.Review>>()[0];
 
         // Act
-        var result = await this.Client.CallToolAsync("DeleteReview",
-            new Dictionary<string, object> { ["id"] = existingReview.Id });
+        var result = await this.Client.CallToolAsync("reviews_delete",
+            new Dictionary<string, object> { ["reviewId"] = existingReview.Id });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
-        text.ShouldBe("Review deleted successfully");
+        var deleted = text.Deserialize<DeletedReview>();
 
-        var validateResult = await this.Client.CallToolAsync("GetReviewById",
-            new Dictionary<string, object> { ["id"] = existingReview.Id });
+        deleted.ReviewId.ShouldBe(existingReview.Id);
+        deleted.Deleted.ShouldBeTrue();
+
+        var validateResult = await this.Client.CallToolAsync("reviews_get",
+            new Dictionary<string, object> { ["reviewId"] = existingReview.Id });
         var validateText = validateResult.Content.OfType<TextContentBlock>().First().Text;
 
         validateText.ShouldStartWith("Not Found:");
@@ -197,26 +196,26 @@ public class ReviewToolTests : BaseToolTests
     public async Task GetReviewById_WithEmptyId_ShouldReturn_ValidationError()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetReviewById",
-            new Dictionary<string, object> { ["id"] = Guid.Empty });
+        var result = await this.Client.CallToolAsync("reviews_get",
+            new Dictionary<string, object> { ["reviewId"] = Guid.Empty });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
         result.IsError.ShouldBe(true);
-        text.ShouldBe("Validation Failed: Id: A Review Id was not supplied.");
+        text.ShouldBe("Validation Failed: Id: A Review Id was not supplied. Correct the arguments and call the tool again.");
     }
 
     [Fact]
     public async Task GetReviewById_WithUnknownId_ShouldReturn_NotFoundError()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetReviewById",
-            new Dictionary<string, object> { ["id"] = Guid.NewGuid() });
+        var result = await this.Client.CallToolAsync("reviews_get",
+            new Dictionary<string, object> { ["reviewId"] = Guid.NewGuid() });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
         result.IsError.ShouldBe(true);
-        text.ShouldBe("Not Found: The Review with the supplied id was not found.");
+        text.ShouldBe("Not Found: The Review with the supplied id was not found. Check the ids, using reviews_list or the other list tools to find valid ones.");
     }
 
     [Theory]
@@ -227,8 +226,8 @@ public class ReviewToolTests : BaseToolTests
         try
         {
             // Act
-            var result = await this.Client.CallToolAsync("GetReviewById",
-                new Dictionary<string, object> { ["id"] = input });
+            var result = await this.Client.CallToolAsync("reviews_get",
+                new Dictionary<string, object> { ["reviewId"] = input });
 
             // Assert
             result.IsError.ShouldBe(true);

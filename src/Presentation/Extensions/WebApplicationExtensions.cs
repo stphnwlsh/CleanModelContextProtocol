@@ -17,7 +17,7 @@ public static class WebApplicationExtensions
 
         #region Model Context Protocol
 
-        _ = app.MapMcp();
+        _ = app.MapMcp("/mcp");
 
         #endregion Model Context Protocol
 

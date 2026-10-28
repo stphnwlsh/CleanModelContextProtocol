@@ -40,7 +40,7 @@ dotnet new install CleanModelContextProtocol.Template
 ### Create a solution
 
 ``` bash
-dotnet new cleanmodelcontextprotocol --name {YOUR_SOLUTION_NAMESPACE} --author "{YOUR_NAME}"
+dotnet new cleanmodelcontextprotocol --name {YOUR_SOLUTION_NAMESPACE} --authorName "{YOUR_NAME}"
 ```
 
 ## Running the project
@@ -49,18 +49,12 @@ dotnet new cleanmodelcontextprotocol --name {YOUR_SOLUTION_NAMESPACE} --author "
 docker compose up -d
 ```
 
-Then open the MCP endpoint (connect with an MCP client such as the [MCP Inspector](https://github.com/modelcontextprotocol/inspector)) at <http://localhost:8080>. See [docs/RUN.md](docs/RUN.md) for every way to run it.
+Then open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) at <http://localhost:6274>. It's already pointed at the MCP endpoint (<http://localhost:8080/mcp>), so connect and open **Tools** to browse and run them. See [docs/RUN.md](docs/RUN.md) for every way to run it.
 
 The `Dockerfile` has stages for testing, publishing and running, so you can build just the part you need. You can also stamp a version into the assembly.
 
 ``` bash
 docker build . --target run --tag cleanmodelcontextprotocol:latest --build-arg VERSION_PREFIX={VERSION_NUMBER} --build-arg VERSION_SUFFIX={PRERELEASE_NAME}
-```
-
-Every push to `main` publishes an image to Docker Hub.
-
-``` bash
-docker pull stphnwlsh/cleanmodelcontextprotocol
 ```
 
 ## Architecture
@@ -79,15 +73,17 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 
 ## Features
 
-- MCP server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk)
+- MCP server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk), stateless Streamable HTTP at `/mcp`
+- Tools named by resource (`movies_list`, `reviews_create`) with titles, read-only, destructive and idempotent hints, and descriptions written for agents
 - Logging using [Serilog](https://github.com/serilog/serilog), with [Seq](https://datalust.co/seq) when running in Docker
 - Mediator pattern using [Mediator](https://github.com/martinothamar/Mediator)
 - Validation using [FluentValidation](https://github.com/FluentValidation/FluentValidation) in an Application pipeline behaviour
-- Tool errors mapped from Application exceptions by a single call-tool filter
+- Typed tool results published with an output schema and returned as structured content as well as JSON text
+- Tool errors mapped from Application exceptions by a single call-tool filter, with messages that tell the agent how to recover
 - Object mapping using [Mapperly](https://mapperly.riok.app)
 - In-memory data using [Entity Framework Core](https://learn.microsoft.com/ef/core/providers/in-memory/) seeded with [Bogus](https://github.com/bchavez/Bogus)
 - Testing using [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet)
-- CI with GitHub Actions: build and test, 95% coverage gate, [Trivy](https://trivy.dev) container scan, [CodeQL](https://codeql.github.com) static analysis, then Docker Hub and NuGet publishing from `main` using [trusted publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+- CI with GitHub Actions: build and test, 95% coverage gate, [Trivy](https://trivy.dev) container scan, [CodeQL](https://codeql.github.com) static analysis, then NuGet publishing and a GitHub release from `main` using [trusted publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
 - Monthly grouped dependency updates using [Dependabot](https://docs.github.com/code-security/dependabot)
 
 ## Related templates
