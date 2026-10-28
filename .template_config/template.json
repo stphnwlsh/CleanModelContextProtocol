@@ -3,15 +3,15 @@
   "author": "Stephen Walsh",
   "classifications": [
     "Clean Architecture",
-    "Clean",
-    "Model Context Protocol",
-    "ModelContextProtocol",
+    "AI",
     "MCP",
+    "Model Context Protocol",
     "Dotnet",
     "Docker"
   ],
   "identity": "CleanModelContextProtocol.Template",
   "name": "Clean Model Context Protocol Template",
+  "description": "A dotnet new template for a Model Context Protocol server using the MCP C# SDK, built with a streamlined Clean Architecture on .NET 10.",
   "shortName": "cleanmodelcontextprotocol",
   "tags": {
     "language": "C#",
