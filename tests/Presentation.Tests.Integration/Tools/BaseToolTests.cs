@@ -7,7 +7,7 @@ using Xunit;
 public abstract class BaseToolTests : IAsyncLifetime, IAsyncDisposable
 {
 #pragma warning disable CS8618
-    private CleanModelContextProtocolApplication application;
+    private ModelContextProtocolApplication application;
     private bool disposed;
 
     protected McpClient Client { get; private set; }
@@ -15,7 +15,7 @@ public abstract class BaseToolTests : IAsyncLifetime, IAsyncDisposable
 
     public async Task InitializeAsync()
     {
-        this.application = new CleanModelContextProtocolApplication();
+        this.application = new ModelContextProtocolApplication();
         this.Client = await McpClient.CreateAsync(
             new HttpClientTransport(
                 new HttpClientTransportOptions { Endpoint = new Uri("http://localhost/mcp") },
