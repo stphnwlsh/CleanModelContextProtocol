@@ -15,4 +15,4 @@ public record MovieResult(
     [property: Description("The movie's title.")] string Title,
     [property: Description("How many reviews the movie has.")] int ReviewCount,
     [property: Description("The average star rating, from 1 to 5, or null when there are no reviews.")] double? AverageStars,
-    [property: Description("Every review of the movie, when they were asked for.")] List<ReviewResult> Reviews = null);
+    [property: Description("Every review of the movie, when they were asked for.")] List<ReviewResult>? Reviews = null);

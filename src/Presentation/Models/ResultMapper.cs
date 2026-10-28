@@ -34,7 +34,7 @@ public static class ResultMapper
             includeReviews ? [.. reviews.Select(r => r.ToResult(author: new ReviewAuthor(author.Id, author.FirstName, author.LastName)))] : null);
     }
 
-    public static ReviewResult ToResult(this Review review, ReviewedMovie movie = null, ReviewAuthor author = null)
+    public static ReviewResult ToResult(this Review review, ReviewedMovie? movie = null, ReviewAuthor? author = null)
     {
         movie = review.ReviewedMovie ?? movie;
         author = review.ReviewAuthor ?? author;
@@ -50,7 +50,9 @@ public static class ResultMapper
 
     public static ResultPage<TResult> ToResult<T, TResult>(this Page<T> page, Func<T, TResult> map)
     {
-        return new ResultPage<TResult>([.. page.Items.Select(map)], page.TotalCount, page.NextCursor);
+        var nextOffset = page.Offset + page.Items.Count;
+
+        return new ResultPage<TResult>([.. page.Items.Select(map)], page.TotalCount, nextOffset < page.TotalCount ? nextOffset : null);
     }
 
     private static string FullName(string firstName, string lastName)

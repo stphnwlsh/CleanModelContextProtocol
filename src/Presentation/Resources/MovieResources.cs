@@ -14,12 +14,13 @@ public static class MovieResources
     [Description("A movie with its review count, average stars and every review, including each author's name.")]
     public static async Task<string> GetMovie(
         ISender sender,
-        [Description("The movie's id (a GUID).")] Guid movieId)
+        [Description("The movie's id (a GUID).")] Guid movieId,
+        CancellationToken cancellationToken)
     {
         var movie = await sender.Send(new Queries.GetMovieById.GetMovieByIdQuery
         {
             Id = movieId
-        });
+        }, cancellationToken);
 
         return McpSerializer.Serialize(movie.ToResult(includeReviews: true));
     }

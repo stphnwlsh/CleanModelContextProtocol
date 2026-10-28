@@ -25,7 +25,7 @@ public static class ProtocolErrorFilter
         };
     }
 
-    public static McpProtocolException ToProtocolException(Exception exception)
+    public static McpProtocolException? ToProtocolException(Exception exception)
     {
         return exception switch
         {

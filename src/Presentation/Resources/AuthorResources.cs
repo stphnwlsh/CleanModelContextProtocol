@@ -14,12 +14,13 @@ public static class AuthorResources
     [Description("An author with their review count, average stars and every review they have written, including each movie's title.")]
     public static async Task<string> GetAuthor(
         ISender sender,
-        [Description("The author's id (a GUID).")] Guid authorId)
+        [Description("The author's id (a GUID).")] Guid authorId,
+        CancellationToken cancellationToken)
     {
         var author = await sender.Send(new Queries.GetAuthorById.GetAuthorByIdQuery
         {
             Id = authorId
-        });
+        }, cancellationToken);
 
         return McpSerializer.Serialize(author.ToResult(includeReviews: true));
     }

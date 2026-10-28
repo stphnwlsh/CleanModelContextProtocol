@@ -14,12 +14,13 @@ public static class ReviewResources
     [Description("A review with its star rating, the movie's title and the author's name.")]
     public static async Task<string> GetReview(
         ISender sender,
-        [Description("The review's id (a GUID).")] Guid reviewId)
+        [Description("The review's id (a GUID).")] Guid reviewId,
+        CancellationToken cancellationToken)
     {
         var review = await sender.Send(new Queries.GetReviewById.GetReviewByIdQuery
         {
             Id = reviewId
-        });
+        }, cancellationToken);
 
         return McpSerializer.Serialize(review.ToResult());
     }

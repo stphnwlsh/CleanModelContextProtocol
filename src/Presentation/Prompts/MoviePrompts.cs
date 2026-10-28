@@ -15,9 +15,10 @@ public static class MoviePrompts
     [Description("Summarise how reviewers have received a movie: its average stars, how the ratings spread, and who liked it most and least.")]
     public static async Task<GetPromptResult> SummariseMovieReception(
         ISender sender,
-        [Description("The movie's title, or part of it.")] string movieTitle)
+        [Description("The movie's title, or part of it.")] string movieTitle,
+        CancellationToken cancellationToken)
     {
-        var movie = await FindMovie(sender, movieTitle);
+        var movie = await FindMovie(sender, movieTitle, cancellationToken);
 
         var messages = new List<PromptMessage>
         {
@@ -45,10 +46,11 @@ public static class MoviePrompts
     public static async Task<GetPromptResult> CompareMovies(
         ISender sender,
         [Description("The first movie's title, or part of it.")] string firstMovieTitle,
-        [Description("The second movie's title, or part of it.")] string secondMovieTitle)
+        [Description("The second movie's title, or part of it.")] string secondMovieTitle,
+        CancellationToken cancellationToken)
     {
-        var first = await FindMovie(sender, firstMovieTitle);
-        var second = await FindMovie(sender, secondMovieTitle);
+        var first = await FindMovie(sender, firstMovieTitle, cancellationToken);
+        var second = await FindMovie(sender, secondMovieTitle, cancellationToken);
 
         var messages = new List<PromptMessage>
         {
@@ -88,13 +90,13 @@ public static class MoviePrompts
         };
     }
 
-    private static async Task<MovieResult> FindMovie(ISender sender, string title)
+    private static async Task<MovieResult?> FindMovie(ISender sender, string? title, CancellationToken cancellationToken)
     {
-        var page = await sender.Send(new Queries.SearchMovies.SearchMoviesQuery
+        var page = await sender.Send(new Queries.GetMovies.GetMoviesQuery
         {
             Query = title,
             Limit = 5
-        });
+        }, cancellationToken);
 
         var movie = page.Items.FirstOrDefault(m => string.Equals(m.Title, title?.Trim(), StringComparison.OrdinalIgnoreCase))
             ?? (page.TotalCount == 1 ? page.Items[0] : null);

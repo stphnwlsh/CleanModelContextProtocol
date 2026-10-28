@@ -17,10 +17,10 @@ public static class CompletionHandler
 
     public static async ValueTask<CompleteResult> Handle(RequestContext<CompleteRequestParams> context, CancellationToken cancellationToken)
     {
-        return await Complete(context.Services.GetRequiredService<ISender>(), context.Params, cancellationToken);
+        return await Complete(context.Services!.GetRequiredService<ISender>(), context.Params, cancellationToken);
     }
 
-    public static async Task<CompleteResult> Complete(ISender sender, CompleteRequestParams request, CancellationToken cancellationToken)
+    public static async Task<CompleteResult> Complete(ISender sender, CompleteRequestParams? request, CancellationToken cancellationToken)
     {
         var argument = request?.Argument;
 
@@ -33,7 +33,7 @@ public static class CompletionHandler
         {
             case "movieTitle" or "firstMovieTitle" or "secondMovieTitle":
             {
-                var page = await sender.Send(new MovieQueries.SearchMovies.SearchMoviesQuery
+                var page = await sender.Send(new MovieQueries.GetMovies.GetMoviesQuery
                 {
                     Query = argument.Value,
                     Limit = Paging.MaxLimit
@@ -44,7 +44,7 @@ public static class CompletionHandler
 
             case "authorName":
             {
-                var page = await sender.Send(new AuthorQueries.SearchAuthors.SearchAuthorsQuery
+                var page = await sender.Send(new AuthorQueries.GetAuthors.GetAuthorsQuery
                 {
                     Query = argument.Value,
                     Limit = Paging.MaxLimit

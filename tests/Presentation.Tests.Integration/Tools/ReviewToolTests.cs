@@ -23,7 +23,7 @@ public class ReviewToolTests : BaseToolTests
         // Assert
         page.TotalCount.ShouldBe(150);
         page.Items.Count.ShouldBe(10);
-        page.NextCursor.ShouldNotBeNull();
+        page.NextOffset.ShouldNotBeNull();
 
         foreach (var review in page.Items)
         {
@@ -38,14 +38,14 @@ public class ReviewToolTests : BaseToolTests
     {
         // Arrange
         var movie = (await this.CallAsync<ResultPage<MovieResult>>("movies_search",
-            new Dictionary<string, object> { ["limit"] = 50 })).Items.First(m => m.ReviewCount > 0);
-        var review = (await this.CallAsync<MovieResult>("movies_get", new Dictionary<string, object> { ["movieId"] = movie.Id })).Reviews[0];
+            new Dictionary<string, object?> { ["limit"] = 50 })).Items.First(m => m.ReviewCount > 0);
+        var review = (await this.CallAsync<MovieResult>("movies_get", new Dictionary<string, object?> { ["movieId"] = movie.Id })).Reviews.ShouldNotBeNull()[0];
 
         // Act
         var byMovie = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list",
-            new Dictionary<string, object> { ["movieId"] = movie.Id, ["limit"] = 50 });
+            new Dictionary<string, object?> { ["movieId"] = movie.Id, ["limit"] = 50 });
         var byBoth = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list",
-            new Dictionary<string, object> { ["movieId"] = movie.Id, ["authorId"] = review.AuthorId });
+            new Dictionary<string, object?> { ["movieId"] = movie.Id, ["authorId"] = review.AuthorId });
 
         // Assert
         byMovie.TotalCount.ShouldBe(movie.ReviewCount);
@@ -61,7 +61,7 @@ public class ReviewToolTests : BaseToolTests
         var first = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list")).Items[0];
 
         // Act
-        var page = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list", new Dictionary<string, object> { ["reviewId"] = first.Id });
+        var page = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list", new Dictionary<string, object?> { ["reviewId"] = first.Id });
 
         // Assert
         page.TotalCount.ShouldBe(1);
@@ -72,7 +72,7 @@ public class ReviewToolTests : BaseToolTests
     public async Task ListReviews_WithUnknownReviewId_ShouldReturn_NotFoundError()
     {
         // Act
-        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object> { ["reviewId"] = Guid.NewGuid() });
+        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object?> { ["reviewId"] = Guid.NewGuid() });
 
         // Assert
         text.ShouldBe("Not Found: The Review with the supplied id was not found. Check the ids: movies_search, authors_search and reviews_list return valid ones.");
@@ -82,7 +82,7 @@ public class ReviewToolTests : BaseToolTests
     public async Task ListReviews_WithEmptyMovieId_ShouldReturn_ValidationError()
     {
         // Act
-        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object> { ["movieId"] = Guid.Empty });
+        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object?> { ["movieId"] = Guid.Empty });
 
         // Assert
         text.ShouldStartWith("Validation Failed: MovieId: A Movie Id can't be empty.");
@@ -96,7 +96,7 @@ public class ReviewToolTests : BaseToolTests
 
         // Act
         var review = await this.CallAsync<ReviewResult>("reviews_write",
-            new Dictionary<string, object> { ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 5 });
+            new Dictionary<string, object?> { ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 5 });
 
         // Assert
         review.Id.ShouldNotBe(Guid.Empty);
@@ -106,26 +106,39 @@ public class ReviewToolTests : BaseToolTests
         review.AuthorId.ShouldBe(author.Id);
         review.AuthorName.ShouldBe(author.Name);
 
-        var after = await this.CallAsync<MovieResult>("movies_get", new Dictionary<string, object> { ["movieId"] = movie.Id });
+        var after = await this.CallAsync<MovieResult>("movies_get", new Dictionary<string, object?> { ["movieId"] = movie.Id });
         after.ReviewCount.ShouldBe(movie.ReviewCount + 1);
     }
 
     [Fact]
-    public async Task WriteReview_ShouldUpdate_Review()
+    public async Task WriteReview_ShouldUpdate_OnlyTheStars()
     {
         // Arrange
         var (movie, author) = await this.FirstMovieAndAuthor();
         var existing = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list")).Items[0];
+        var stars = existing.Stars == 5 ? 1 : existing.Stars + 1;
 
         // Act
         var review = await this.CallAsync<ReviewResult>("reviews_write",
-            new Dictionary<string, object> { ["reviewId"] = existing.Id, ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 1 });
+            new Dictionary<string, object?> { ["reviewId"] = existing.Id, ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = stars });
 
         // Assert
         review.Id.ShouldBe(existing.Id);
-        review.Stars.ShouldBe(1);
-        review.MovieId.ShouldBe(movie.Id);
-        review.AuthorId.ShouldBe(author.Id);
+        review.Stars.ShouldBe(stars);
+        review.MovieId.ShouldBe(existing.MovieId);
+        review.AuthorId.ShouldBe(existing.AuthorId);
+    }
+
+    [Fact]
+    public async Task WriteReview_WithoutMovieOrAuthor_ShouldReturn_ValidationError()
+    {
+        // Act
+        var text = await this.CallForErrorAsync("reviews_write", new Dictionary<string, object?> { ["stars"] = 3 });
+
+        // Assert
+        text.ShouldStartWith("Validation Failed:");
+        text.ShouldContain("AuthorId");
+        text.ShouldContain("MovieId");
     }
 
     [Fact]
@@ -136,7 +149,7 @@ public class ReviewToolTests : BaseToolTests
 
         // Act
         var text = await this.CallForErrorAsync("reviews_write",
-            new Dictionary<string, object> { ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 9 });
+            new Dictionary<string, object?> { ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 9 });
 
         // Assert
         text.ShouldBe("Validation Failed: Stars: A star rating must be between 1 and 5. Correct the arguments and call the tool again.");
@@ -150,7 +163,7 @@ public class ReviewToolTests : BaseToolTests
 
         // Act
         var text = await this.CallForErrorAsync("reviews_write",
-            new Dictionary<string, object> { ["reviewId"] = Guid.NewGuid(), ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 3 });
+            new Dictionary<string, object?> { ["reviewId"] = Guid.NewGuid(), ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 3 });
 
         // Assert
         text.ShouldStartWith("Not Found:");
@@ -163,13 +176,13 @@ public class ReviewToolTests : BaseToolTests
         var existing = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list")).Items[0];
 
         // Act
-        var result = await this.CallAsync<DeletedReview>("reviews_delete", new Dictionary<string, object> { ["reviewId"] = existing.Id });
+        var result = await this.CallAsync<DeletedReview>("reviews_delete", new Dictionary<string, object?> { ["reviewId"] = existing.Id });
 
         // Assert
         result.ReviewId.ShouldBe(existing.Id);
         result.Deleted.ShouldBeTrue();
 
-        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object> { ["reviewId"] = existing.Id });
+        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object?> { ["reviewId"] = existing.Id });
         text.ShouldStartWith("Not Found:");
     }
 
@@ -177,7 +190,7 @@ public class ReviewToolTests : BaseToolTests
     public async Task DeleteReview_WithUnknownId_ShouldReturn_NotFoundError()
     {
         // Act
-        var text = await this.CallForErrorAsync("reviews_delete", new Dictionary<string, object> { ["reviewId"] = Guid.NewGuid() });
+        var text = await this.CallForErrorAsync("reviews_delete", new Dictionary<string, object?> { ["reviewId"] = Guid.NewGuid() });
 
         // Assert
         text.ShouldStartWith("Not Found: The Review with the supplied id was not found.");

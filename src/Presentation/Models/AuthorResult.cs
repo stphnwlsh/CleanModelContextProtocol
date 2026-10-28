@@ -15,4 +15,4 @@ public record AuthorResult(
     [property: Description("The author's full name.")] string Name,
     [property: Description("How many reviews the author has written.")] int ReviewCount,
     [property: Description("The average star rating the author gives, from 1 to 5, or null when they have no reviews.")] double? AverageStars,
-    [property: Description("Every review the author has written, when they were asked for.")] List<ReviewResult> Reviews = null);
+    [property: Description("Every review the author has written, when they were asked for.")] List<ReviewResult>? Reviews = null);

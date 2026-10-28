@@ -2,6 +2,7 @@ namespace CleanModelContextProtocol.Presentation.Extensions;
 
 using System.Diagnostics.CodeAnalysis;
 using CleanModelContextProtocol.Presentation.Authentication;
+using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Serilog;
 
@@ -10,6 +11,12 @@ public static class WebApplicationExtensions
 {
     public static WebApplication ConfigureApplication(this WebApplication app)
     {
+        #region Database
+
+        _ = app.Services.InitialiseInfrastructure();
+
+        #endregion Database
+
         #region Logging
 
         _ = app.UseSerilogRequestLogging();

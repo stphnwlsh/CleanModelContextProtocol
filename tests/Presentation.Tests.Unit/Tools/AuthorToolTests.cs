@@ -21,15 +21,15 @@ public class AuthorToolTests
         var author = new Entities.Author(Guid.Empty, "Lorem", "Ipsum", [new Review(Guid.Empty, 4, new ReviewedMovie(Guid.Empty, "Dolor"))]);
 
         _ = sender
-            .Send(Arg.Is<Queries.SearchAuthors.SearchAuthorsQuery>(q => q.Query == "lorem" && q.Limit == 10 && q.Cursor == null))
-            .Returns(new Page<Entities.Author>([author], 1));
+            .Send(Arg.Is<Queries.GetAuthors.GetAuthorsQuery>(q => q.Query == "lorem" && q.Offset == 0 && q.Limit == 10))
+            .Returns(new Page<Entities.Author>([author], 0, 10, 1));
 
         // Act
-        var response = await AuthorTools.SearchAuthors(sender, "lorem");
+        var response = await AuthorTools.SearchAuthors(sender, CancellationToken.None, "lorem");
 
         // Assert
         response.TotalCount.ShouldBe(1);
-        response.NextCursor.ShouldBeNull();
+        response.NextOffset.ShouldBeNull();
         response.Items[0].Name.ShouldBe("Lorem Ipsum");
         response.Items[0].ReviewCount.ShouldBe(1);
         response.Items[0].AverageStars.ShouldBe(4);
@@ -44,15 +44,15 @@ public class AuthorToolTests
         var author = new Entities.Author(Guid.Empty, "Lorem", "Ipsum", [new Review(Guid.Empty, 4, new ReviewedMovie(Guid.Empty, "Dolor"))]);
 
         _ = sender
-            .Send(Arg.Any<Queries.SearchAuthors.SearchAuthorsQuery>())
-            .ReturnsForAnyArgs(new Page<Entities.Author>([author], 1));
+            .Send(Arg.Any<Queries.GetAuthors.GetAuthorsQuery>())
+            .ReturnsForAnyArgs(new Page<Entities.Author>([author], 0, 10, 1));
 
         // Act
-        var response = await AuthorTools.SearchAuthors(sender, includeReviews: true);
+        var response = await AuthorTools.SearchAuthors(sender, CancellationToken.None, includeReviews: true);
 
         // Assert
-        response.Items[0].Reviews.Count.ShouldBe(1);
-        response.Items[0].Reviews[0].MovieTitle.ShouldBe("Dolor");
-        response.Items[0].Reviews[0].AuthorName.ShouldBe("Lorem Ipsum");
+        response.Items[0].Reviews.ShouldNotBeNull().Count.ShouldBe(1);
+        response.Items[0].Reviews![0].MovieTitle.ShouldBe("Dolor");
+        response.Items[0].Reviews![0].AuthorName.ShouldBe("Lorem Ipsum");
     }
 }
