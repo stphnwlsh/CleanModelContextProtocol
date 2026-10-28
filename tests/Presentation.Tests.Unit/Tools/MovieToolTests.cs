@@ -27,7 +27,7 @@ public class MovieToolTests
             ]);
 
         // Act
-        var response = await MovieTools.GetAllMovies(sender);
+        var response = await MovieTools.ListMovies(sender);
 
         // Assert
         var result = JsonSerializer.Deserialize<List<Entities.Movie>>(response, JsonOptions);
@@ -49,7 +49,7 @@ public class MovieToolTests
             .ReturnsForAnyArgs(new Entities.Movie(Guid.Empty, "Lorem Ipsum"));
 
         // Act
-        var response = await MovieTools.GetMovieById(sender, Guid.Empty);
+        var response = await MovieTools.GetMovie(sender, Guid.Empty);
 
         // Assert
         var result = JsonSerializer.Deserialize<Entities.Movie>(response, JsonOptions);

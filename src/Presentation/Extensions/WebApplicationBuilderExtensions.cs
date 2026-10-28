@@ -61,28 +61,30 @@ public static class WebApplicationBuilderExtensions
             {
                 options.ServerInfo = new()
                 {
-                    Name = "Clean Model Context Protocol",
-                    Description = "A demonstration of the Clean Model Context Protocol in a .NET application",
-                    Title = "Clean Model Context Protocol - Presentation Layer",
+                    Name = "clean-model-context-protocol",
+                    Title = "Clean Model Context Protocol",
+                    Description = "Movies, the authors who review them, and their star ratings, served by a Clean Architecture .NET MCP server.",
                     Version = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty,
                     WebsiteUrl = "https://github.com/stphnwlsh/CleanModelContextProtocol",
                     Icons =
                     [
                         new()
                         {
-                            Source = "images/Icon.png",
+                            Source = "https://raw.githubusercontent.com/stphnwlsh/CleanModelContextProtocol/main/icon.png",
                             MimeType = "image/png"
                         }
                     ],
                 };
-                options.ServerInstructions = "You are a helpful assistant for handling requests related to movies, " +
-                    "authors, and reviews. Use the available tools to retrieve information about movies, authors, and " +
-                    "reviews based on the queries you receive. Always ensure that your responses are accurate and relevant " +
-                    "to the user's request. Return the full sets of data anc convert them into tabulated markdown formats " +
-                    "for display where sensible. Some datasets involve a number of sub objects, please calculate a count of " +
-                    "that data for better formatting.";
+                options.ServerInstructions = """
+                    This server holds a catalogue of movies, the authors who review them, and their reviews.
+                    A review links one author to one movie with a star rating from 1 (worst) to 5 (best).
+                    Every movie, author and review is identified by a GUID id. Ids are never guessable, so look them up
+                    with movies_list, authors_list or reviews_list before calling a tool that needs one.
+                    To change a review use reviews_update, which overwrites the author, movie and stars together.
+                    reviews_delete can't be undone, so confirm with the user before calling it.
+                    """;
             })
-            .WithHttpTransport()
+            .WithHttpTransport(options => options.Stateless = true)
             .WithToolsFromAssembly()
             .WithRequestFilters(filters => filters.AddCallToolFilter(ToolErrorFilter.Filter));
 

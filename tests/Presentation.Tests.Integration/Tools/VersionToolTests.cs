@@ -10,7 +10,7 @@ public class VersionToolTests : BaseToolTests
     public async Task GetVersion_ShouldReturn_Version()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetVersion");
+        var result = await this.Client.CallToolAsync("server_get_version");
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert

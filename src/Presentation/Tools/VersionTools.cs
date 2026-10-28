@@ -8,8 +8,8 @@ using Queries = Application.Versions.Queries;
 [McpServerToolType]
 public static class VersionTools
 {
-    [McpServerTool(Name = "GetVersion", ReadOnly = true)]
-    [Description("Get the current application version details")]
+    [McpServerTool(Name = "server_get_version", Title = "Get server version", ReadOnly = true, Idempotent = true, OpenWorld = false)]
+    [Description("Get the version of this server: the file version and the informational version, which includes the commit it was built from.")]
     public static async Task<string> GetVersion(ISender sender)
     {
         var result = await sender.Send(new Queries.GetVersion.GetVersionQuery());
