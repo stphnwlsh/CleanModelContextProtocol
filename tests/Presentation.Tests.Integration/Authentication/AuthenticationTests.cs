@@ -39,8 +39,12 @@ public class AuthenticationTests : IDisposable
     [Fact]
     public async Task Mcp_WithoutToken_ShouldReturn_UnauthorizedWithResourceMetadata()
     {
+        // Arrange
+        using var client = this.application.CreateClient();
+        using var content = new StringContent("{}", Encoding.UTF8, "application/json");
+
         // Act
-        var response = await this.application.CreateClient().PostAsync(new Uri("http://localhost/mcp"), new StringContent("{}", Encoding.UTF8, "application/json"));
+        using var response = await client.PostAsync(new Uri("http://localhost/mcp"), content);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
@@ -50,8 +54,11 @@ public class AuthenticationTests : IDisposable
     [Fact]
     public async Task ResourceMetadata_ShouldReturn_AuthorizationServer()
     {
+        // Arrange
+        using var client = this.application.CreateClient();
+
         // Act
-        var response = await this.application.CreateClient().GetAsync(new Uri("http://localhost/.well-known/oauth-protected-resource/mcp"));
+        using var response = await client.GetAsync(new Uri("http://localhost/.well-known/oauth-protected-resource/mcp"));
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -66,11 +73,12 @@ public class AuthenticationTests : IDisposable
     public async Task Mcp_WithWrongAudience_ShouldReturn_Unauthorized()
     {
         // Arrange
-        var client = this.application.CreateClient();
+        using var client = this.application.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", CreateToken("https://someone-else.example.com"));
+        using var content = new StringContent("{}", Encoding.UTF8, "application/json");
 
         // Act
-        var response = await client.PostAsync(new Uri("http://localhost/mcp"), new StringContent("{}", Encoding.UTF8, "application/json"));
+        using var response = await client.PostAsync(new Uri("http://localhost/mcp"), content);
 
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
@@ -80,7 +88,7 @@ public class AuthenticationTests : IDisposable
     public async Task Mcp_WithToken_ShouldList_Tools()
     {
         // Arrange
-        var httpClient = this.application.CreateClient();
+        using var httpClient = this.application.CreateClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", CreateToken(Audience));
 
         await using var client = await McpClient.CreateAsync(
