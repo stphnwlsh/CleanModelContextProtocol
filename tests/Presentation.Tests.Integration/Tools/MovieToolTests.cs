@@ -1,116 +1,153 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Integration.Tools;
 
-using Extensions;
+using CleanModelContextProtocol.Presentation.Models;
 using ModelContextProtocol;
-using ModelContextProtocol.Protocol;
 using Shouldly;
 using Xunit;
-using Entities = Application.Movies.Entities;
 
 public class MovieToolTests : BaseToolTests
 {
     [Fact]
-    public async Task GetAllMovies_ShouldReturn_Movies()
+    public async Task SearchMovies_ShouldReturn_FirstPage()
     {
         // Act
-        var result = await this.Client.CallToolAsync("movies_list");
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
-        var movies = text.Deserialize<List<Entities.Movie>>();
+        var page = await this.CallAsync<ResultPage<MovieResult>>("movies_search");
 
         // Assert
-        _ = movies.ShouldNotBeNull();
+        page.TotalCount.ShouldBe(50);
+        page.Items.Count.ShouldBe(10);
+        page.NextCursor.ShouldNotBeNullOrWhiteSpace();
+        page.Items.Select(m => m.Title).ShouldBeInOrder(SortDirection.Ascending, StringComparer.CurrentCulture);
 
-        movies.ShouldNotBeEmpty();
-        movies.Count.ShouldBe(50);
-
-        foreach (var movie in movies)
+        foreach (var movie in page.Items)
         {
-            _ = movie.ShouldNotBeNull();
-            _ = movie.Id.ShouldBeOfType<Guid>();
-            _ = movie.Title.ShouldBeOfType<string>();
+            movie.Id.ShouldNotBe(Guid.Empty);
             movie.Title.ShouldNotBeNullOrWhiteSpace();
+            movie.Reviews.ShouldBeNull();
 
-            foreach (var review in movie.Reviews ?? [])
+            if (movie.ReviewCount > 0)
             {
-                _ = review.Stars.ShouldBeOfType<int>();
-                review.Stars.ShouldBeInRange(1, 5);
-
-                _ = review.ReviewAuthor.ShouldNotBeNull();
-                _ = review.ReviewAuthor.Id.ShouldBeOfType<Guid>();
-                _ = review.ReviewAuthor.FirstName.ShouldBeOfType<string>();
-                review.ReviewAuthor.FirstName.ShouldNotBeNullOrWhiteSpace();
-                _ = review.ReviewAuthor.LastName.ShouldBeOfType<string>();
-                review.ReviewAuthor.LastName.ShouldNotBeNullOrWhiteSpace();
+                _ = movie.AverageStars.ShouldNotBeNull();
+                movie.AverageStars.Value.ShouldBeInRange(1, 5);
             }
         }
     }
 
     [Fact]
-    public async Task GetMovieById_ShouldReturn_Movie()
+    public async Task SearchMovies_ShouldPage_ThroughEveryMovie()
     {
         // Arrange
-        var allResult = await this.Client.CallToolAsync("movies_list");
-        var allText = allResult.Content.OfType<TextContentBlock>().First().Text;
-        var firstMovie = allText.Deserialize<List<Entities.Movie>>().First(m => m.Reviews?.Count > 0);
+        var titles = new List<string>();
+        string cursor = null;
 
         // Act
-        var result = await this.Client.CallToolAsync("movies_get",
-            new Dictionary<string, object> { ["movieId"] = firstMovie.Id });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
-        var movie = text.Deserialize<Entities.Movie>();
+        do
+        {
+            var arguments = new Dictionary<string, object> { ["limit"] = 20 };
+
+            if (cursor is not null)
+            {
+                arguments["cursor"] = cursor;
+            }
+
+            var page = await this.CallAsync<ResultPage<MovieResult>>("movies_search", arguments);
+
+            titles.AddRange(page.Items.Select(m => m.Title));
+            cursor = page.NextCursor;
+        }
+        while (cursor is not null);
 
         // Assert
-        _ = movie.ShouldNotBeNull();
+        titles.Count.ShouldBe(50);
+    }
 
-        movie.Id.ShouldBe(firstMovie.Id);
-        _ = movie.Title.ShouldBeOfType<string>();
-        movie.Title.ShouldNotBeNullOrWhiteSpace();
-        movie.Reviews.ShouldNotBeEmpty();
+    [Fact]
+    public async Task SearchMovies_ShouldFind_MovieByTitle()
+    {
+        // Arrange
+        var first = (await this.CallAsync<ResultPage<MovieResult>>("movies_search")).Items[0];
 
-        foreach (var review in movie.Reviews ?? [])
+        // Act
+        var page = await this.CallAsync<ResultPage<MovieResult>>("movies_search",
+            new Dictionary<string, object> { ["query"] = first.Title.ToUpperInvariant(), ["includeReviews"] = true });
+
+        // Assert
+        page.Items.ShouldContain(m => m.Id == first.Id);
+        page.Items.ShouldAllBe(m => m.Title.Contains(first.Title, StringComparison.OrdinalIgnoreCase));
+        page.Items.ShouldAllBe(m => m.Reviews != null && m.Reviews.Count == m.ReviewCount);
+    }
+
+    [Fact]
+    public async Task SearchMovies_WithInvalidLimit_ShouldReturn_ValidationError()
+    {
+        // Act
+        var text = await this.CallForErrorAsync("movies_search", new Dictionary<string, object> { ["limit"] = 500 });
+
+        // Assert
+        text.ShouldBe("Validation Failed: Limit: A limit must be between 1 and 50. Correct the arguments and call the tool again.");
+    }
+
+    [Fact]
+    public async Task SearchMovies_WithInvalidCursor_ShouldReturn_ValidationError()
+    {
+        // Act
+        var text = await this.CallForErrorAsync("movies_search", new Dictionary<string, object> { ["cursor"] = "nope" });
+
+        // Assert
+        text.ShouldStartWith("Validation Failed: Cursor: The cursor is not valid.");
+    }
+
+    [Fact]
+    public async Task GetMovie_ShouldReturn_MovieWithReviews()
+    {
+        // Arrange
+        var first = (await this.CallAsync<ResultPage<MovieResult>>("movies_search",
+            new Dictionary<string, object> { ["limit"] = 50 })).Items.First(m => m.ReviewCount > 0);
+
+        // Act
+        var movie = await this.CallAsync<MovieResult>("movies_get", new Dictionary<string, object> { ["movieId"] = first.Id });
+
+        // Assert
+        movie.Id.ShouldBe(first.Id);
+        movie.Title.ShouldBe(first.Title);
+        movie.ReviewCount.ShouldBe(first.ReviewCount);
+        movie.AverageStars.ShouldBe(first.AverageStars);
+        movie.Reviews.Count.ShouldBe(movie.ReviewCount);
+
+        foreach (var review in movie.Reviews)
         {
-            _ = review.Stars.ShouldBeOfType<int>();
             review.Stars.ShouldBeInRange(1, 5);
-
-            _ = review.ReviewAuthor.ShouldNotBeNull();
-            _ = review.ReviewAuthor.Id.ShouldBeOfType<Guid>();
-            _ = review.ReviewAuthor.FirstName.ShouldBeOfType<string>();
-            review.ReviewAuthor.FirstName.ShouldNotBeNullOrWhiteSpace();
-            _ = review.ReviewAuthor.LastName.ShouldBeOfType<string>();
-            review.ReviewAuthor.LastName.ShouldNotBeNullOrWhiteSpace();
+            review.MovieId.ShouldBe(movie.Id);
+            review.MovieTitle.ShouldBe(movie.Title);
+            review.AuthorId.ShouldNotBeNull();
+            review.AuthorName.ShouldNotBeNullOrWhiteSpace();
         }
     }
 
     [Fact]
-    public async Task GetMovieById_WithEmptyId_ShouldReturn_ValidationError()
+    public async Task GetMovie_WithEmptyId_ShouldReturn_ValidationError()
     {
         // Act
-        var result = await this.Client.CallToolAsync("movies_get",
-            new Dictionary<string, object> { ["movieId"] = Guid.Empty });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
+        var text = await this.CallForErrorAsync("movies_get", new Dictionary<string, object> { ["movieId"] = Guid.Empty });
 
         // Assert
-        result.IsError.ShouldBe(true);
         text.ShouldBe("Validation Failed: Id: A Movie Id was not supplied. Correct the arguments and call the tool again.");
     }
 
     [Fact]
-    public async Task GetMovieById_WithUnknownId_ShouldReturn_NotFoundError()
+    public async Task GetMovie_WithUnknownId_ShouldReturn_NotFoundError()
     {
         // Act
-        var result = await this.Client.CallToolAsync("movies_get",
-            new Dictionary<string, object> { ["movieId"] = Guid.NewGuid() });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
+        var text = await this.CallForErrorAsync("movies_get", new Dictionary<string, object> { ["movieId"] = Guid.NewGuid() });
 
         // Assert
-        result.IsError.ShouldBe(true);
-        text.ShouldBe("Not Found: The Movie with the supplied id was not found. Check the ids, using movies_list or the other list tools to find valid ones.");
+        text.ShouldBe("Not Found: The Movie with the supplied id was not found. Check the ids: movies_search, authors_search and reviews_list return valid ones.");
     }
 
     [Theory]
     [InlineData("1")]
     [InlineData("fake")]
-    public async Task GetMovieById_WithInvalidId_ShouldReturn_Error(string input)
+    public async Task GetMovie_WithInvalidId_ShouldReturn_Error(string input)
     {
         try
         {

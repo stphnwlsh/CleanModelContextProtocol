@@ -1,6 +1,7 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Tools;
 
 using Application.Authors.Entities;
+using Application.Common.Paging;
 using Application.Movies.Entities;
 using CleanModelContextProtocol.Presentation.Tools;
 using Mediator;
@@ -13,113 +14,99 @@ using Queries = Application.Reviews.Queries;
 
 public class ReviewToolTests
 {
-    private static Entities.Review SampleReview()
+    private static readonly Guid ReviewId = Guid.NewGuid();
+    private static readonly Guid MovieId = Guid.NewGuid();
+    private static readonly Guid AuthorId = Guid.NewGuid();
+
+    private static Entities.Review SampleReview(int stars = 5)
     {
-        return new(
-        Guid.Empty,
-        5,
-        new ReviewedMovie(Guid.Empty, "Lorem Ipsum"),
-        new ReviewAuthor(Guid.Empty, "Lorem", "Ipsum"));
+        return new(ReviewId, stars, new ReviewedMovie(MovieId, "Lorem Ipsum"), new ReviewAuthor(AuthorId, "Dolor", "Sit"));
     }
 
     [Fact]
-    public async Task GetAllReviews_ShouldReturn_Result()
+    public async Task ListReviews_ShouldReturn_Page()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Any<Queries.GetReviews.GetReviewsQuery>())
-            .ReturnsForAnyArgs([SampleReview()]);
+            .Send(Arg.Is<Queries.SearchReviews.SearchReviewsQuery>(q => q.MovieId == MovieId && q.AuthorId == AuthorId && q.Limit == 2 && q.Cursor == "abc"))
+            .Returns(new Page<Entities.Review>([SampleReview()], 3, "next"));
 
         // Act
-        var response = await ReviewTools.ListReviews(sender);
+        var response = await ReviewTools.ListReviews(sender, MovieId, AuthorId, null, 2, "abc");
 
         // Assert
-        var result = response;
-
-        result.ShouldNotBeNull();
-        result[0].Id.ShouldBe(Guid.Empty);
-        result[0].Stars.ShouldBe(5);
-        result[0].ReviewAuthor.Id.ShouldBe(Guid.Empty);
-        result[0].ReviewAuthor.FirstName.ShouldBe("Lorem");
-        result[0].ReviewAuthor.LastName.ShouldBe("Ipsum");
-        result[0].ReviewedMovie.Id.ShouldBe(Guid.Empty);
-        result[0].ReviewedMovie.Title.ShouldBe("Lorem Ipsum");
+        response.TotalCount.ShouldBe(3);
+        response.NextCursor.ShouldBe("next");
+        response.Items[0].Id.ShouldBe(ReviewId);
+        response.Items[0].Stars.ShouldBe(5);
+        response.Items[0].MovieId.ShouldBe(MovieId);
+        response.Items[0].MovieTitle.ShouldBe("Lorem Ipsum");
+        response.Items[0].AuthorId.ShouldBe(AuthorId);
+        response.Items[0].AuthorName.ShouldBe("Dolor Sit");
     }
 
     [Fact]
-    public async Task GetReviewById_ShouldReturn_Result()
+    public async Task ListReviews_ShouldReturn_OneReview()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Any<Queries.GetReviewById.GetReviewByIdQuery>())
-            .ReturnsForAnyArgs(SampleReview());
+            .Send(Arg.Is<Queries.GetReviewById.GetReviewByIdQuery>(q => q.Id == ReviewId))
+            .Returns(SampleReview());
 
         // Act
-        var response = await ReviewTools.GetReview(sender, Guid.Empty);
+        var response = await ReviewTools.ListReviews(sender, reviewId: ReviewId);
 
         // Assert
-        var result = response;
-
-        result.ShouldNotBeNull();
-        result.Id.ShouldBe(Guid.Empty);
-        result.Stars.ShouldBe(5);
-        result.ReviewAuthor.Id.ShouldBe(Guid.Empty);
-        result.ReviewAuthor.FirstName.ShouldBe("Lorem");
-        result.ReviewAuthor.LastName.ShouldBe("Ipsum");
-        result.ReviewedMovie.Id.ShouldBe(Guid.Empty);
-        result.ReviewedMovie.Title.ShouldBe("Lorem Ipsum");
+        response.TotalCount.ShouldBe(1);
+        response.NextCursor.ShouldBeNull();
+        response.Items.Single().Id.ShouldBe(ReviewId);
+        _ = await sender.DidNotReceive().Send(Arg.Any<Queries.SearchReviews.SearchReviewsQuery>());
     }
 
     [Fact]
-    public async Task CreateReview_ShouldReturn_Result()
+    public async Task WriteReview_ShouldCreate_Review()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Any<Commands.CreateReview.CreateReviewCommand>())
-            .ReturnsForAnyArgs(SampleReview());
+            .Send(Arg.Is<Commands.CreateReview.CreateReviewCommand>(c => c.MovieId == MovieId && c.AuthorId == AuthorId && c.Stars == 4))
+            .Returns(SampleReview(4));
 
         // Act
-        var response = await ReviewTools.CreateReview(sender, Guid.Empty, Guid.Empty, 5);
+        var response = await ReviewTools.WriteReview(sender, MovieId, AuthorId, 4);
 
         // Assert
-        var result = response;
-
-        result.ShouldNotBeNull();
-        result.Id.ShouldBe(Guid.Empty);
-        result.Stars.ShouldBe(5);
-        result.ReviewAuthor.Id.ShouldBe(Guid.Empty);
-        result.ReviewAuthor.FirstName.ShouldBe("Lorem");
-        result.ReviewAuthor.LastName.ShouldBe("Ipsum");
-        result.ReviewedMovie.Id.ShouldBe(Guid.Empty);
-        result.ReviewedMovie.Title.ShouldBe("Lorem Ipsum");
+        response.Id.ShouldBe(ReviewId);
+        response.Stars.ShouldBe(4);
+        _ = await sender.DidNotReceive().Send(Arg.Any<Commands.UpdateReview.UpdateReviewCommand>());
     }
 
     [Fact]
-    public async Task UpdateReview_ShouldReturn_Review()
+    public async Task WriteReview_ShouldUpdate_Review()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Any<Commands.UpdateReview.UpdateReviewCommand>())
-            .ReturnsForAnyArgs(true);
+            .Send(Arg.Is<Commands.UpdateReview.UpdateReviewCommand>(c => c.Id == ReviewId && c.MovieId == MovieId && c.AuthorId == AuthorId && c.Stars == 2))
+            .Returns(true);
 
         _ = sender
-            .Send(Arg.Any<Queries.GetReviewById.GetReviewByIdQuery>())
-            .ReturnsForAnyArgs(SampleReview());
+            .Send(Arg.Is<Queries.GetReviewById.GetReviewByIdQuery>(q => q.Id == ReviewId))
+            .Returns(SampleReview(2));
 
         // Act
-        var response = await ReviewTools.UpdateReview(sender, Guid.Empty, Guid.Empty, Guid.Empty, 5);
+        var response = await ReviewTools.WriteReview(sender, MovieId, AuthorId, 2, ReviewId);
 
         // Assert
-        response.Id.ShouldBe(Guid.Empty);
-        response.Stars.ShouldBe(5);
+        response.Id.ShouldBe(ReviewId);
+        response.Stars.ShouldBe(2);
+        _ = await sender.DidNotReceive().Send(Arg.Any<Commands.CreateReview.CreateReviewCommand>());
     }
 
     [Fact]
@@ -129,14 +116,14 @@ public class ReviewToolTests
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Any<Commands.DeleteReview.DeleteReviewCommand>())
-            .ReturnsForAnyArgs(true);
+            .Send(Arg.Is<Commands.DeleteReview.DeleteReviewCommand>(c => c.Id == ReviewId))
+            .Returns(true);
 
         // Act
-        var response = await ReviewTools.DeleteReview(sender, Guid.Empty);
+        var response = await ReviewTools.DeleteReview(sender, ReviewId);
 
         // Assert
-        response.ReviewId.ShouldBe(Guid.Empty);
+        response.ReviewId.ShouldBe(ReviewId);
         response.Deleted.ShouldBeTrue();
     }
 }

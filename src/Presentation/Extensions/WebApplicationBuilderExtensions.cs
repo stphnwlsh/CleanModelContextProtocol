@@ -75,9 +75,10 @@ public static class WebApplicationBuilderExtensions
                 options.ServerInstructions = """
                     This server holds a catalogue of movies, the authors who review them, and their reviews.
                     A review links one author to one movie with a star rating from 1 (worst) to 5 (best).
-                    Every movie, author and review is identified by a GUID id. Ids are never guessable, so look them up
-                    with movies_list, authors_list or reviews_list before calling a tool that needs one.
-                    To change a review use reviews_update, which overwrites the author, movie and stars together.
+                    Find things by name first: movies_search and authors_search return ids, review counts and average
+                    stars, and reviews_list filters reviews by movie or author. Every search returns one page at a time,
+                    so pass nextCursor back to continue rather than raising the limit.
+                    reviews_write creates a review, or replaces one when you pass its reviewId.
                     reviews_delete can't be undone, so confirm with the user before calling it.
                     """;
             })

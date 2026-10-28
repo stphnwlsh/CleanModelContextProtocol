@@ -5,70 +5,80 @@ using CleanModelContextProtocol.Presentation.Models;
 using Mediator;
 using ModelContextProtocol.Server;
 using Commands = Application.Reviews.Commands;
-using Entities = Application.Reviews.Entities;
 using Queries = Application.Reviews.Queries;
 
 [McpServerToolType]
 public static class ReviewTools
 {
     [McpServerTool(Name = "reviews_list", Title = "List reviews", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("List every review with its id, star rating (1 to 5), the movie it is for and the author who wrote it.")]
-    public static async Task<List<Entities.Review>> ListReviews(ISender sender)
-    {
-        return await sender.Send(new Queries.GetReviews.GetReviewsQuery());
-    }
-
-    [McpServerTool(Name = "reviews_get", Title = "Get review", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Get one review by id, with its star rating, the movie it is for and the author who wrote it.")]
-    public static async Task<Entities.Review> GetReview(
+    [Description("List reviews with their star rating and the title and author of each, in movie-title order. Filter by movie, " +
+        "by author or both, or pass a reviewId to get exactly one review. With no filters it pages through every review.")]
+    public static async Task<ResultPage<ReviewResult>> ListReviews(
         ISender sender,
-        [Description("The review's id (a GUID). Use reviews_list to find it.")] Guid reviewId)
+        [Description("Only reviews of this movie. Use movies_search to find the id.")] Guid? movieId = null,
+        [Description("Only reviews by this author. Use authors_search to find the id.")] Guid? authorId = null,
+        [Description("Get this one review instead of searching. The other filters are ignored.")] Guid? reviewId = null,
+        [Description("The most results to return, from 1 to 50.")] int limit = 10,
+        [Description("The nextCursor from a previous call, to get the next page. Leave empty for the first page.")] string cursor = null)
     {
-        return await sender.Send(new Queries.GetReviewById.GetReviewByIdQuery
+        if (reviewId.HasValue)
         {
-            Id = reviewId
-        });
-    }
+            var review = await sender.Send(new Queries.GetReviewById.GetReviewByIdQuery
+            {
+                Id = reviewId.Value
+            });
 
-    [McpServerTool(Name = "reviews_create", Title = "Create review", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Create a review of a movie by an author with a star rating from 1 to 5, and return the new review. " +
-        "Each call creates another review, so don't retry a call that succeeded.")]
-    public static async Task<Entities.Review> CreateReview(
-        ISender sender,
-        [Description("The id of the author writing the review. Use authors_list to find it.")] Guid authorId,
-        [Description("The id of the movie being reviewed. Use movies_list to find it.")] Guid movieId,
-        [Description("The star rating, a whole number from 1 (worst) to 5 (best).")] int stars)
-    {
-        return await sender.Send(new Commands.CreateReview.CreateReviewCommand
+            return new ResultPage<ReviewResult>([review.ToResult()], 1, null);
+        }
+
+        var page = await sender.Send(new Queries.SearchReviews.SearchReviewsQuery
         {
-            AuthorId = authorId,
             MovieId = movieId,
-            Stars = stars
+            AuthorId = authorId,
+            Limit = limit,
+            Cursor = cursor
         });
+
+        return page.ToResult(r => r.ToResult());
     }
 
-    [McpServerTool(Name = "reviews_update", Title = "Update review", ReadOnly = false, Destructive = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Replace an existing review's author, movie and star rating. Every field is overwritten, " +
-        "so pass the current author and movie ids when you only want to change the stars. Returns the updated review.")]
-    public static async Task<Entities.Review> UpdateReview(
+    [McpServerTool(Name = "reviews_write", Title = "Write review", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
+    [Description("Create a review of a movie by an author with a star rating from 1 to 5, or pass a reviewId to replace that " +
+        "review's movie, author and stars. Returns the saved review. Without a reviewId every call creates another review, " +
+        "so don't retry a call that succeeded.")]
+    public static async Task<ReviewResult> WriteReview(
         ISender sender,
-        [Description("The id of the review to update. Use reviews_list to find it.")] Guid reviewId,
-        [Description("The id of the author writing the review. Use authors_list to find it.")] Guid authorId,
-        [Description("The id of the movie being reviewed. Use movies_list to find it.")] Guid movieId,
-        [Description("The star rating, a whole number from 1 (worst) to 5 (best).")] int stars)
+        [Description("The id of the movie being reviewed. Use movies_search to find it.")] Guid movieId,
+        [Description("The id of the author writing the review. Use authors_search to find it.")] Guid authorId,
+        [Description("The star rating, a whole number from 1 (worst) to 5 (best).")] int stars,
+        [Description("The id of an existing review to replace. Leave empty to create a new review.")] Guid? reviewId = null)
     {
+        if (!reviewId.HasValue)
+        {
+            var created = await sender.Send(new Commands.CreateReview.CreateReviewCommand
+            {
+                AuthorId = authorId,
+                MovieId = movieId,
+                Stars = stars
+            });
+
+            return created.ToResult();
+        }
+
         _ = await sender.Send(new Commands.UpdateReview.UpdateReviewCommand
         {
-            Id = reviewId,
+            Id = reviewId.Value,
             AuthorId = authorId,
             MovieId = movieId,
             Stars = stars
         });
 
-        return await sender.Send(new Queries.GetReviewById.GetReviewByIdQuery
+        var updated = await sender.Send(new Queries.GetReviewById.GetReviewByIdQuery
         {
-            Id = reviewId
+            Id = reviewId.Value
         });
+
+        return updated.ToResult();
     }
 
     [McpServerTool(Name = "reviews_delete", Title = "Delete review", ReadOnly = false, Destructive = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]

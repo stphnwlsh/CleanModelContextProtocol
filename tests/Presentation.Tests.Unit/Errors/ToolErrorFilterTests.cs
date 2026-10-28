@@ -35,7 +35,7 @@ public class ToolErrorFilterTests
 
         // Assert
         result.IsError.ShouldBe(true);
-        result.Content.OfType<TextContentBlock>().Single().Text.ShouldBe("Not Found: Expected Exception");
+        result.Content.OfType<TextContentBlock>().Single().Text.ShouldBe("Not Found: Expected Exception Check the ids: movies_search, authors_search and reviews_list return valid ones.");
     }
 
     [Fact]
@@ -65,21 +65,7 @@ public class ToolErrorFilterTests
 
         // Assert
         result.IsError.ShouldBe(true);
-        result.Content.OfType<TextContentBlock>().Single().Text.ShouldBe("Not Found: Expected Exception");
-    }
-
-    [Theory]
-    [InlineData("movies_get", "Not Found: Expected Exception Check the ids, using movies_list or the other list tools to find valid ones.")]
-    [InlineData("server", "Not Found: Expected Exception")]
-    [InlineData("_get", "Not Found: Expected Exception")]
-    public void ToResult_ShouldReturn_NotFoundErrorWithHint(string toolName, string expected)
-    {
-        // Act
-        var result = ToolErrorFilter.ToResult(new NotFoundException("Expected Exception"), toolName);
-
-        // Assert
-        result.IsError.ShouldBe(true);
-        result.Content.OfType<TextContentBlock>().Single().Text.ShouldBe(expected);
+        result.Content.OfType<TextContentBlock>().Single().Text.ShouldBe("Not Found: Expected Exception Check the ids: movies_search, authors_search and reviews_list return valid ones.");
     }
 
     [Fact]

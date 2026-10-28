@@ -1,31 +1,32 @@
 namespace CleanModelContextProtocol.Presentation.Tools;
 
 using System.ComponentModel;
+using CleanModelContextProtocol.Presentation.Models;
 using Mediator;
 using ModelContextProtocol.Server;
-using Entities = Application.Authors.Entities;
 using Queries = Application.Authors.Queries;
 
 [McpServerToolType]
 public static class AuthorTools
 {
-    [McpServerTool(Name = "authors_list", Title = "List authors", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("List every author who has written reviews, with their id, first and last name, and the reviews they have written. " +
-        "Use this to find an author's id before calling authors_get, reviews_create or reviews_update.")]
-    public static async Task<List<Entities.Author>> ListAuthors(ISender sender)
-    {
-        return await sender.Send(new Queries.GetAuthors.GetAuthorsQuery());
-    }
-
-    [McpServerTool(Name = "authors_get", Title = "Get author", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
-    [Description("Get one author by id, including every review they have written and the movie each review is for.")]
-    public static async Task<Entities.Author> GetAuthor(
+    [McpServerTool(Name = "authors_search", Title = "Search authors", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
+    [Description("Find the authors who write reviews by first name, last name or full name, ignoring case, in last-name order. " +
+        "Each result has the author's id, name, review count and the average stars they give. Leave the query empty to browse " +
+        "every author a page at a time. Use this to find an author's id before calling reviews_list or reviews_write.")]
+    public static async Task<ResultPage<AuthorResult>> SearchAuthors(
         ISender sender,
-        [Description("The author's id (a GUID). Use authors_list to find it.")] Guid authorId)
+        [Description("Part of the author's name, such as 'marie' or 'marie hirthe'. Leave empty to list every author.")] string query = null,
+        [Description("The most results to return, from 1 to 50.")] int limit = 10,
+        [Description("The nextCursor from a previous call, to get the next page. Leave empty for the first page.")] string cursor = null,
+        [Description("Also return every review each author has written. Leave false unless you need the individual reviews.")] bool includeReviews = false)
     {
-        return await sender.Send(new Queries.GetAuthorById.GetAuthorByIdQuery
+        var page = await sender.Send(new Queries.SearchAuthors.SearchAuthorsQuery
         {
-            Id = authorId
+            Query = query,
+            Limit = limit,
+            Cursor = cursor
         });
+
+        return page.ToResult(a => a.ToResult(includeReviews));
     }
 }

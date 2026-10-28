@@ -1,240 +1,185 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Integration.Tools;
 
 using CleanModelContextProtocol.Presentation.Models;
-using Extensions;
-using ModelContextProtocol;
-using ModelContextProtocol.Protocol;
 using Shouldly;
 using Xunit;
-using AuthorEntities = Application.Authors.Entities;
-using Entities = Application.Reviews.Entities;
-using MovieEntities = Application.Movies.Entities;
 
 public class ReviewToolTests : BaseToolTests
 {
+    private async Task<(MovieResult Movie, AuthorResult Author)> FirstMovieAndAuthor()
+    {
+        var movie = (await this.CallAsync<ResultPage<MovieResult>>("movies_search")).Items[0];
+        var author = (await this.CallAsync<ResultPage<AuthorResult>>("authors_search")).Items[0];
+
+        return (movie, author);
+    }
+
     [Fact]
-    public async Task GetAllReviews_ShouldReturn_Reviews()
+    public async Task ListReviews_ShouldReturn_FirstPage()
     {
         // Act
-        var result = await this.Client.CallToolAsync("reviews_list");
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
-        var reviews = text.Deserialize<List<Entities.Review>>();
+        var page = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list");
 
         // Assert
-        _ = reviews.ShouldNotBeNull();
+        page.TotalCount.ShouldBe(150);
+        page.Items.Count.ShouldBe(10);
+        page.NextCursor.ShouldNotBeNull();
 
-        reviews.ShouldNotBeEmpty();
-        reviews.Count.ShouldBe(150);
-
-        foreach (var review in reviews)
+        foreach (var review in page.Items)
         {
-            _ = review.ShouldNotBeNull();
-            _ = review.Id.ShouldBeOfType<Guid>();
-            _ = review.Stars.ShouldBeOfType<int>();
             review.Stars.ShouldBeInRange(1, 5);
-
-            _ = review.ReviewAuthor.ShouldNotBeNull();
-            _ = review.ReviewAuthor.Id.ShouldBeOfType<Guid>();
-            _ = review.ReviewAuthor.FirstName.ShouldBeOfType<string>();
-            review.ReviewAuthor.FirstName.ShouldNotBeNullOrWhiteSpace();
-            _ = review.ReviewAuthor.LastName.ShouldBeOfType<string>();
-            review.ReviewAuthor.LastName.ShouldNotBeNullOrWhiteSpace();
-
-            _ = review.ReviewedMovie.ShouldNotBeNull();
-            _ = review.ReviewedMovie.Id.ShouldBeOfType<Guid>();
-            _ = review.ReviewedMovie.Title.ShouldBeOfType<string>();
-            review.ReviewedMovie.Title.ShouldNotBeNullOrWhiteSpace();
+            review.MovieTitle.ShouldNotBeNullOrWhiteSpace();
+            review.AuthorName.ShouldNotBeNullOrWhiteSpace();
         }
     }
 
     [Fact]
-    public async Task GetReviewById_ShouldReturn_Review()
+    public async Task ListReviews_ShouldFilter_ByMovieAndAuthor()
     {
         // Arrange
-        var allResult = await this.Client.CallToolAsync("reviews_list");
-        var allText = allResult.Content.OfType<TextContentBlock>().First().Text;
-        var firstReview = allText.Deserialize<List<Entities.Review>>()[0];
+        var movie = (await this.CallAsync<ResultPage<MovieResult>>("movies_search",
+            new Dictionary<string, object> { ["limit"] = 50 })).Items.First(m => m.ReviewCount > 0);
+        var review = (await this.CallAsync<MovieResult>("movies_get", new Dictionary<string, object> { ["movieId"] = movie.Id })).Reviews[0];
 
         // Act
-        var result = await this.Client.CallToolAsync("reviews_get",
-            new Dictionary<string, object> { ["reviewId"] = firstReview.Id });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
-        var review = text.Deserialize<Entities.Review>();
+        var byMovie = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list",
+            new Dictionary<string, object> { ["movieId"] = movie.Id, ["limit"] = 50 });
+        var byBoth = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list",
+            new Dictionary<string, object> { ["movieId"] = movie.Id, ["authorId"] = review.AuthorId });
 
         // Assert
-        _ = review.ShouldNotBeNull();
-
-        _ = review.Id.ShouldBeOfType<Guid>();
-        review.Id.ShouldBe(firstReview.Id);
-        _ = review.Stars.ShouldBeOfType<int>();
-        review.Stars.ShouldBeInRange(1, 5);
-
-        _ = review.ReviewAuthor.ShouldNotBeNull();
-        _ = review.ReviewAuthor.Id.ShouldBeOfType<Guid>();
-        _ = review.ReviewAuthor.FirstName.ShouldBeOfType<string>();
-        review.ReviewAuthor.FirstName.ShouldNotBeNullOrWhiteSpace();
-        _ = review.ReviewAuthor.LastName.ShouldBeOfType<string>();
-        review.ReviewAuthor.LastName.ShouldNotBeNullOrWhiteSpace();
-
-        _ = review.ReviewedMovie.ShouldNotBeNull();
-        _ = review.ReviewedMovie.Id.ShouldBeOfType<Guid>();
-        _ = review.ReviewedMovie.Title.ShouldBeOfType<string>();
+        byMovie.TotalCount.ShouldBe(movie.ReviewCount);
+        byMovie.Items.ShouldAllBe(r => r.MovieId == movie.Id);
+        byBoth.Items.ShouldContain(r => r.Id == review.Id);
+        byBoth.Items.ShouldAllBe(r => r.MovieId == movie.Id && r.AuthorId == review.AuthorId);
     }
 
     [Fact]
-    public async Task CreateReview_ShouldReturn_Review()
+    public async Task ListReviews_ShouldReturn_OneReview()
     {
         // Arrange
-        var authorResult = await this.Client.CallToolAsync("authors_list");
-        var authorText = authorResult.Content.OfType<TextContentBlock>().First().Text;
-        var author = authorText.Deserialize<List<AuthorEntities.Author>>()[0];
-
-        var movieResult = await this.Client.CallToolAsync("movies_list");
-        var movieText = movieResult.Content.OfType<TextContentBlock>().First().Text;
-        var movie = movieText.Deserialize<List<MovieEntities.Movie>>()[0];
+        var first = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list")).Items[0];
 
         // Act
-        var result = await this.Client.CallToolAsync("reviews_create",
-            new Dictionary<string, object>
-            {
-                ["authorId"] = author.Id,
-                ["movieId"] = movie.Id,
-                ["stars"] = 5
-            });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
-        var review = text.Deserialize<Entities.Review>();
+        var page = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list", new Dictionary<string, object> { ["reviewId"] = first.Id });
 
         // Assert
-        _ = review.ShouldNotBeNull();
+        page.TotalCount.ShouldBe(1);
+        page.Items.ShouldHaveSingleItem().ShouldBe(first);
+    }
 
-        _ = review.Id.ShouldBeOfType<Guid>();
-        _ = review.Stars.ShouldBeOfType<int>();
+    [Fact]
+    public async Task ListReviews_WithUnknownReviewId_ShouldReturn_NotFoundError()
+    {
+        // Act
+        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object> { ["reviewId"] = Guid.NewGuid() });
+
+        // Assert
+        text.ShouldBe("Not Found: The Review with the supplied id was not found. Check the ids: movies_search, authors_search and reviews_list return valid ones.");
+    }
+
+    [Fact]
+    public async Task ListReviews_WithEmptyMovieId_ShouldReturn_ValidationError()
+    {
+        // Act
+        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object> { ["movieId"] = Guid.Empty });
+
+        // Assert
+        text.ShouldStartWith("Validation Failed: MovieId: A Movie Id can't be empty.");
+    }
+
+    [Fact]
+    public async Task WriteReview_ShouldCreate_Review()
+    {
+        // Arrange
+        var (movie, author) = await this.FirstMovieAndAuthor();
+
+        // Act
+        var review = await this.CallAsync<ReviewResult>("reviews_write",
+            new Dictionary<string, object> { ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 5 });
+
+        // Assert
+        review.Id.ShouldNotBe(Guid.Empty);
         review.Stars.ShouldBe(5);
+        review.MovieId.ShouldBe(movie.Id);
+        review.MovieTitle.ShouldBe(movie.Title);
+        review.AuthorId.ShouldBe(author.Id);
+        review.AuthorName.ShouldBe(author.Name);
 
-        _ = review.ReviewAuthor.ShouldNotBeNull();
-        review.ReviewAuthor.Id.ShouldBe(author.Id);
-        review.ReviewAuthor.FirstName.ShouldBe(author.FirstName);
-        review.ReviewAuthor.LastName.ShouldBe(author.LastName);
-
-        _ = review.ReviewedMovie.ShouldNotBeNull();
-        review.ReviewedMovie.Id.ShouldBe(movie.Id);
-        review.ReviewedMovie.Title.ShouldBe(movie.Title);
+        var after = await this.CallAsync<MovieResult>("movies_get", new Dictionary<string, object> { ["movieId"] = movie.Id });
+        after.ReviewCount.ShouldBe(movie.ReviewCount + 1);
     }
 
     [Fact]
-    public async Task UpdateReview_ShouldReturn_Review()
+    public async Task WriteReview_ShouldUpdate_Review()
     {
         // Arrange
-        var authorResult = await this.Client.CallToolAsync("authors_list");
-        var authorText = authorResult.Content.OfType<TextContentBlock>().First().Text;
-        var author = authorText.Deserialize<List<AuthorEntities.Author>>()[0];
-
-        var movieResult = await this.Client.CallToolAsync("movies_list");
-        var movieText = movieResult.Content.OfType<TextContentBlock>().First().Text;
-        var movie = movieText.Deserialize<List<MovieEntities.Movie>>()[0];
-
-        var reviewsResult = await this.Client.CallToolAsync("reviews_list");
-        var reviewsText = reviewsResult.Content.OfType<TextContentBlock>().First().Text;
-        var existingReview = reviewsText.Deserialize<List<Entities.Review>>()[0];
+        var (movie, author) = await this.FirstMovieAndAuthor();
+        var existing = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list")).Items[0];
 
         // Act
-        var result = await this.Client.CallToolAsync("reviews_update",
-            new Dictionary<string, object>
-            {
-                ["reviewId"] = existingReview.Id,
-                ["authorId"] = author.Id,
-                ["movieId"] = movie.Id,
-                ["stars"] = 5
-            });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
+        var review = await this.CallAsync<ReviewResult>("reviews_write",
+            new Dictionary<string, object> { ["reviewId"] = existing.Id, ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 1 });
 
         // Assert
-        var updatedReview = text.Deserialize<Entities.Review>();
-
-        _ = updatedReview.ShouldNotBeNull();
-
-        updatedReview.Id.ShouldBe(existingReview.Id);
-        updatedReview.Stars.ShouldBe(5);
-
-        _ = updatedReview.ReviewAuthor.ShouldNotBeNull();
-        updatedReview.ReviewAuthor.Id.ShouldBe(author.Id);
-        updatedReview.ReviewAuthor.FirstName.ShouldBe(author.FirstName);
-        updatedReview.ReviewAuthor.LastName.ShouldBe(author.LastName);
-
-        _ = updatedReview.ReviewedMovie.ShouldNotBeNull();
-        updatedReview.ReviewedMovie.Id.ShouldBe(movie.Id);
-        updatedReview.ReviewedMovie.Title.ShouldBe(movie.Title);
+        review.Id.ShouldBe(existing.Id);
+        review.Stars.ShouldBe(1);
+        review.MovieId.ShouldBe(movie.Id);
+        review.AuthorId.ShouldBe(author.Id);
     }
 
     [Fact]
-    public async Task DeleteReview_ShouldReturn_Result()
+    public async Task WriteReview_WithInvalidStars_ShouldReturn_ValidationError()
     {
         // Arrange
-        var reviewsResult = await this.Client.CallToolAsync("reviews_list");
-        var reviewsText = reviewsResult.Content.OfType<TextContentBlock>().First().Text;
-        var existingReview = reviewsText.Deserialize<List<Entities.Review>>()[0];
+        var (movie, author) = await this.FirstMovieAndAuthor();
 
         // Act
-        var result = await this.Client.CallToolAsync("reviews_delete",
-            new Dictionary<string, object> { ["reviewId"] = existingReview.Id });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
+        var text = await this.CallForErrorAsync("reviews_write",
+            new Dictionary<string, object> { ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 9 });
 
         // Assert
-        var deleted = text.Deserialize<DeletedReview>();
-
-        deleted.ReviewId.ShouldBe(existingReview.Id);
-        deleted.Deleted.ShouldBeTrue();
-
-        var validateResult = await this.Client.CallToolAsync("reviews_get",
-            new Dictionary<string, object> { ["reviewId"] = existingReview.Id });
-        var validateText = validateResult.Content.OfType<TextContentBlock>().First().Text;
-
-        validateText.ShouldStartWith("Not Found:");
+        text.ShouldBe("Validation Failed: Stars: A star rating must be between 1 and 5. Correct the arguments and call the tool again.");
     }
 
     [Fact]
-    public async Task GetReviewById_WithEmptyId_ShouldReturn_ValidationError()
+    public async Task WriteReview_WithUnknownReviewId_ShouldReturn_NotFoundError()
     {
+        // Arrange
+        var (movie, author) = await this.FirstMovieAndAuthor();
+
         // Act
-        var result = await this.Client.CallToolAsync("reviews_get",
-            new Dictionary<string, object> { ["reviewId"] = Guid.Empty });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
+        var text = await this.CallForErrorAsync("reviews_write",
+            new Dictionary<string, object> { ["reviewId"] = Guid.NewGuid(), ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 3 });
 
         // Assert
-        result.IsError.ShouldBe(true);
-        text.ShouldBe("Validation Failed: Id: A Review Id was not supplied. Correct the arguments and call the tool again.");
+        text.ShouldStartWith("Not Found:");
     }
 
     [Fact]
-    public async Task GetReviewById_WithUnknownId_ShouldReturn_NotFoundError()
+    public async Task DeleteReview_ShouldDelete_Review()
     {
+        // Arrange
+        var existing = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list")).Items[0];
+
         // Act
-        var result = await this.Client.CallToolAsync("reviews_get",
-            new Dictionary<string, object> { ["reviewId"] = Guid.NewGuid() });
-        var text = result.Content.OfType<TextContentBlock>().First().Text;
+        var result = await this.CallAsync<DeletedReview>("reviews_delete", new Dictionary<string, object> { ["reviewId"] = existing.Id });
 
         // Assert
-        result.IsError.ShouldBe(true);
-        text.ShouldBe("Not Found: The Review with the supplied id was not found. Check the ids, using reviews_list or the other list tools to find valid ones.");
+        result.ReviewId.ShouldBe(existing.Id);
+        result.Deleted.ShouldBeTrue();
+
+        var text = await this.CallForErrorAsync("reviews_list", new Dictionary<string, object> { ["reviewId"] = existing.Id });
+        text.ShouldStartWith("Not Found:");
     }
 
-    [Theory]
-    [InlineData("1")]
-    [InlineData("fake")]
-    public async Task GetReviewById_WithInvalidId_ShouldReturn_Error(string input)
+    [Fact]
+    public async Task DeleteReview_WithUnknownId_ShouldReturn_NotFoundError()
     {
-        try
-        {
-            // Act
-            var result = await this.Client.CallToolAsync("reviews_get",
-                new Dictionary<string, object> { ["reviewId"] = input });
+        // Act
+        var text = await this.CallForErrorAsync("reviews_delete", new Dictionary<string, object> { ["reviewId"] = Guid.NewGuid() });
 
-            // Assert
-            result.IsError.ShouldBe(true);
-        }
-        catch (McpException)
-        {
-            // Protocol-level error for unparseable inputs - expected
-        }
+        // Assert
+        text.ShouldStartWith("Not Found: The Review with the supplied id was not found.");
     }
 }
