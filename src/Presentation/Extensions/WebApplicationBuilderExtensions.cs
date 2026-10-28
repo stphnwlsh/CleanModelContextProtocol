@@ -9,8 +9,8 @@ using CleanModelContextProtocol.Presentation.Errors;
 using CleanModelContextProtocol.Presentation.Serialization;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
+using ModelContextProtocol;
 using Serilog;
 
 [ExcludeFromCodeCoverage]
@@ -34,15 +34,12 @@ public static class WebApplicationBuilderExtensions
 
         #region Serialisation
 
-        _ = builder.Services.Configure<JsonOptions>(opt =>
+        var serializerOptions = new JsonSerializerOptions(McpJsonUtilities.DefaultOptions)
         {
-            opt.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-            opt.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            opt.SerializerOptions.PropertyNameCaseInsensitive = true;
-            opt.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            opt.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
-            opt.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-        });
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+        serializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 
         #endregion Serialisation
 
@@ -85,7 +82,7 @@ public static class WebApplicationBuilderExtensions
                     """;
             })
             .WithHttpTransport(options => options.Stateless = true)
-            .WithToolsFromAssembly()
+            .WithToolsFromAssembly(serializerOptions: serializerOptions)
             .WithRequestFilters(filters => filters.AddCallToolFilter(ToolErrorFilter.Filter));
 
         #endregion Model Context Protocol

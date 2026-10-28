@@ -1,6 +1,5 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Tools;
 
-using System.Text.Json;
 using Application.Authors.Entities;
 using Application.Movies.Entities;
 using CleanModelContextProtocol.Presentation.Tools;
@@ -14,8 +13,6 @@ using Queries = Application.Reviews.Queries;
 
 public class ReviewToolTests
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
-
     private static Entities.Review SampleReview()
     {
         return new(
@@ -26,7 +23,7 @@ public class ReviewToolTests
     }
 
     [Fact]
-    public async Task GetAllReviews_ShouldReturn_JsonResult()
+    public async Task GetAllReviews_ShouldReturn_Result()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
@@ -39,7 +36,7 @@ public class ReviewToolTests
         var response = await ReviewTools.ListReviews(sender);
 
         // Assert
-        var result = JsonSerializer.Deserialize<List<Entities.Review>>(response, JsonOptions);
+        var result = response;
 
         result.ShouldNotBeNull();
         result[0].Id.ShouldBe(Guid.Empty);
@@ -52,7 +49,7 @@ public class ReviewToolTests
     }
 
     [Fact]
-    public async Task GetReviewById_ShouldReturn_JsonResult()
+    public async Task GetReviewById_ShouldReturn_Result()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
@@ -65,7 +62,7 @@ public class ReviewToolTests
         var response = await ReviewTools.GetReview(sender, Guid.Empty);
 
         // Assert
-        var result = JsonSerializer.Deserialize<Entities.Review>(response, JsonOptions);
+        var result = response;
 
         result.ShouldNotBeNull();
         result.Id.ShouldBe(Guid.Empty);
@@ -78,7 +75,7 @@ public class ReviewToolTests
     }
 
     [Fact]
-    public async Task CreateReview_ShouldReturn_JsonResult()
+    public async Task CreateReview_ShouldReturn_Result()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
@@ -91,7 +88,7 @@ public class ReviewToolTests
         var response = await ReviewTools.CreateReview(sender, Guid.Empty, Guid.Empty, 5);
 
         // Assert
-        var result = JsonSerializer.Deserialize<Entities.Review>(response, JsonOptions);
+        var result = response;
 
         result.ShouldNotBeNull();
         result.Id.ShouldBe(Guid.Empty);
@@ -104,7 +101,7 @@ public class ReviewToolTests
     }
 
     [Fact]
-    public async Task UpdateReview_ShouldReturn_Success()
+    public async Task UpdateReview_ShouldReturn_Review()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
@@ -113,15 +110,20 @@ public class ReviewToolTests
             .Send(Arg.Any<Commands.UpdateReview.UpdateReviewCommand>())
             .ReturnsForAnyArgs(true);
 
+        _ = sender
+            .Send(Arg.Any<Queries.GetReviewById.GetReviewByIdQuery>())
+            .ReturnsForAnyArgs(SampleReview());
+
         // Act
         var response = await ReviewTools.UpdateReview(sender, Guid.Empty, Guid.Empty, Guid.Empty, 5);
 
         // Assert
-        response.ShouldBe("Review updated successfully");
+        response.Id.ShouldBe(Guid.Empty);
+        response.Stars.ShouldBe(5);
     }
 
     [Fact]
-    public async Task DeleteReview_ShouldReturn_Success()
+    public async Task DeleteReview_ShouldReturn_Result()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
@@ -134,6 +136,7 @@ public class ReviewToolTests
         var response = await ReviewTools.DeleteReview(sender, Guid.Empty);
 
         // Assert
-        response.ShouldBe("Review deleted successfully");
+        response.ReviewId.ShouldBe(Guid.Empty);
+        response.Deleted.ShouldBeTrue();
     }
 }
