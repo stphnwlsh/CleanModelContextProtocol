@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-internal sealed class CleanModelContextProtocolApplication(
+internal sealed class ModelContextProtocolApplication(
     string environment = "local",
     Dictionary<string, string> settings = null,
     Action<IServiceCollection> configureServices = null) : WebApplicationFactory<Program>

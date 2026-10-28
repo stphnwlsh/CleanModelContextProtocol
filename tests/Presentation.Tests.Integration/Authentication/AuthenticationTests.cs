@@ -22,7 +22,7 @@ public class AuthenticationTests : IDisposable
 
     private static readonly SymmetricSecurityKey SigningKey = new(Encoding.UTF8.GetBytes("a-test-signing-key-that-is-long-enough-for-hs256"));
 
-    private readonly CleanModelContextProtocolApplication application = new(
+    private readonly ModelContextProtocolApplication application = new(
         settings: new Dictionary<string, string>
         {
             ["Authentication:Authority"] = Authority,
