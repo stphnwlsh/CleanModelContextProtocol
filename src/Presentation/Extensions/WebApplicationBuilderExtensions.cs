@@ -2,15 +2,13 @@ namespace CleanModelContextProtocol.Presentation.Extensions;
 
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Application;
+using CleanModelContextProtocol.Presentation.Completions;
 using CleanModelContextProtocol.Presentation.Errors;
 using CleanModelContextProtocol.Presentation.Serialization;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using ModelContextProtocol;
 using Serilog;
 
 [ExcludeFromCodeCoverage]
@@ -31,17 +29,6 @@ public static class WebApplicationBuilderExtensions
                     assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion));
 
         #endregion Logging
-
-        #region Serialisation
-
-        var serializerOptions = new JsonSerializerOptions(McpJsonUtilities.DefaultOptions)
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-        serializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-
-        #endregion Serialisation
 
         #region Project Dependencies
 
@@ -80,11 +67,21 @@ public static class WebApplicationBuilderExtensions
                     so pass nextCursor back to continue rather than raising the limit.
                     reviews_write creates a review, or replaces one when you pass its reviewId.
                     reviews_delete can't be undone, so confirm with the user before calling it.
+                    Each movie, author and review can also be read as a resource at movies://{id}, authors://{id} or
+                    reviews://{id}, and server://version gives this server's version.
                     """;
             })
             .WithHttpTransport(options => options.Stateless = true)
-            .WithToolsFromAssembly(serializerOptions: serializerOptions)
-            .WithRequestFilters(filters => filters.AddCallToolFilter(ToolErrorFilter.Filter));
+            .WithToolsFromAssembly(serializerOptions: McpSerializer.Options)
+            .WithResourcesFromAssembly()
+            .WithPromptsFromAssembly(serializerOptions: McpSerializer.Options)
+            .WithCompleteHandler(CompletionHandler.Handle)
+            .WithRequestFilters(filters =>
+            {
+                filters.AddCallToolFilter(ToolErrorFilter.Filter);
+                filters.AddReadResourceFilter(ProtocolErrorFilter.Filter);
+                filters.AddGetPromptFilter(ProtocolErrorFilter.Filter);
+            });
 
         #endregion Model Context Protocol
 
