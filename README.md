@@ -75,12 +75,14 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 
 - MCP server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk), stateless Streamable HTTP at `/mcp`
 - Six task-shaped tools (`movies_search`, `movies_get`, `authors_search`, `reviews_list`, `reviews_write`, `reviews_delete`) with titles, read-only, destructive and idempotent hints, and descriptions written for agents
+- Resources for each movie, author and review (`movies://{movieId}`, `authors://{authorId}`, `reviews://{reviewId}`) and the server version (`server://version`)
+- Prompts for common jobs (`summarise_movie_reception`, `compare_movies`, `review_movie`) that embed the movies they're about, with completions that suggest movie titles and author names as you type
 - Search with paging and small results by default: every list returns 10 items, a total count and a cursor, with names and average ratings next to ids
 - Logging using [Serilog](https://github.com/serilog/serilog), with [Seq](https://datalust.co/seq) when running in Docker
 - Mediator pattern using [Mediator](https://github.com/martinothamar/Mediator)
 - Validation using [FluentValidation](https://github.com/FluentValidation/FluentValidation) in an Application pipeline behaviour
 - Typed tool results published with an output schema and returned as structured content as well as JSON text
-- Tool errors mapped from Application exceptions by a single call-tool filter, with messages that tell the agent how to recover
+- Errors mapped from Application exceptions by request filters: tool errors tell the agent how to recover, and resources and prompts return MCP protocol errors such as resource not found
 - Object mapping using [Mapperly](https://mapperly.riok.app)
 - In-memory data using [Entity Framework Core](https://learn.microsoft.com/ef/core/providers/in-memory/) seeded with [Bogus](https://github.com/bchavez/Bogus)
 - Testing using [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet)

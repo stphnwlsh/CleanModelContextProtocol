@@ -13,7 +13,6 @@ public class ToolListTests : BaseToolTests
         { "reviews_list", "List reviews", true, false, true },
         { "reviews_write", "Write review", false, true, false },
         { "reviews_delete", "Delete review", false, true, true },
-        { "server_get_version", "Get server version", true, false, true }
     };
 
     [Fact]
