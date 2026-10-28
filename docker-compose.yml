@@ -14,6 +14,15 @@ services:
       - cleanmodelcontextprotocol_network
     depends_on:
       - seq
+  inspector:
+    image: ghcr.io/modelcontextprotocol/inspector:2.12.0
+    command: ["--web", "--transport", "http", "--server-url", "http://api:8080/mcp"]
+    ports:
+      - "127.0.0.1:6274:6274"
+    networks:
+      - cleanmodelcontextprotocol_network
+    depends_on:
+      - api
   seq:
     image: datalust/seq:latest
     ports:

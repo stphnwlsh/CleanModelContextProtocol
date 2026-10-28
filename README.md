@@ -49,7 +49,7 @@ dotnet new cleanmodelcontextprotocol --name {YOUR_SOLUTION_NAMESPACE} --authorNa
 docker compose up -d
 ```
 
-Then open the MCP endpoint (connect with an MCP client such as the [MCP Inspector](https://github.com/modelcontextprotocol/inspector)) at <http://localhost:8080>. See [docs/RUN.md](docs/RUN.md) for every way to run it.
+Then open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) at <http://localhost:6274>. It's already pointed at the MCP endpoint (<http://localhost:8080/mcp>), so connect and open **Tools** to browse and run them. See [docs/RUN.md](docs/RUN.md) for every way to run it.
 
 The `Dockerfile` has stages for testing, publishing and running, so you can build just the part you need. You can also stamp a version into the assembly.
 
@@ -73,11 +73,12 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 
 ## Features
 
-- MCP server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk)
+- MCP server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk), stateless Streamable HTTP at `/mcp`
+- Tools named by resource (`movies_list`, `reviews_create`) with titles, read-only, destructive and idempotent hints, and descriptions written for agents
 - Logging using [Serilog](https://github.com/serilog/serilog), with [Seq](https://datalust.co/seq) when running in Docker
 - Mediator pattern using [Mediator](https://github.com/martinothamar/Mediator)
 - Validation using [FluentValidation](https://github.com/FluentValidation/FluentValidation) in an Application pipeline behaviour
-- Tool errors mapped from Application exceptions by a single call-tool filter
+- Tool errors mapped from Application exceptions by a single call-tool filter, with messages that tell the agent how to recover
 - Object mapping using [Mapperly](https://mapperly.riok.app)
 - In-memory data using [Entity Framework Core](https://learn.microsoft.com/ef/core/providers/in-memory/) seeded with [Bogus](https://github.com/bchavez/Bogus)
 - Testing using [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet)

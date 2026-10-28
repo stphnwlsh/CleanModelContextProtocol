@@ -13,7 +13,7 @@ public class AuthorToolTests : BaseToolTests
     public async Task GetAllAuthors_ShouldReturn_Authors()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetAllAuthors");
+        var result = await this.Client.CallToolAsync("authors_list");
         var text = result.Content.OfType<TextContentBlock>().First().Text;
         var authors = text.Deserialize<List<Entities.Author>>();
 
@@ -48,13 +48,13 @@ public class AuthorToolTests : BaseToolTests
     public async Task GetAuthorById_ShouldReturn_Author()
     {
         // Arrange
-        var allResult = await this.Client.CallToolAsync("GetAllAuthors");
+        var allResult = await this.Client.CallToolAsync("authors_list");
         var allText = allResult.Content.OfType<TextContentBlock>().First().Text;
         var firstAuthor = allText.Deserialize<List<Entities.Author>>()[0];
 
         // Act
-        var result = await this.Client.CallToolAsync("GetAuthorById",
-            new Dictionary<string, object> { ["id"] = firstAuthor.Id });
+        var result = await this.Client.CallToolAsync("authors_get",
+            new Dictionary<string, object> { ["authorId"] = firstAuthor.Id });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
         var author = text.Deserialize<Entities.Author>();
 
@@ -83,26 +83,26 @@ public class AuthorToolTests : BaseToolTests
     public async Task GetAuthorById_WithEmptyId_ShouldReturn_ValidationError()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetAuthorById",
-            new Dictionary<string, object> { ["id"] = Guid.Empty });
+        var result = await this.Client.CallToolAsync("authors_get",
+            new Dictionary<string, object> { ["authorId"] = Guid.Empty });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
         result.IsError.ShouldBe(true);
-        text.ShouldBe("Validation Failed: Id: An Author Id was not supplied.");
+        text.ShouldBe("Validation Failed: Id: An Author Id was not supplied. Correct the arguments and call the tool again.");
     }
 
     [Fact]
     public async Task GetAuthorById_WithUnknownId_ShouldReturn_NotFoundError()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetAuthorById",
-            new Dictionary<string, object> { ["id"] = Guid.NewGuid() });
+        var result = await this.Client.CallToolAsync("authors_get",
+            new Dictionary<string, object> { ["authorId"] = Guid.NewGuid() });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
         result.IsError.ShouldBe(true);
-        text.ShouldBe("Not Found: The Author with the supplied id was not found.");
+        text.ShouldBe("Not Found: The Author with the supplied id was not found. Check the ids, using authors_list or the other list tools to find valid ones.");
     }
 
     [Theory]
@@ -113,8 +113,8 @@ public class AuthorToolTests : BaseToolTests
         try
         {
             // Act
-            var result = await this.Client.CallToolAsync("GetAuthorById",
-                new Dictionary<string, object> { ["id"] = input });
+            var result = await this.Client.CallToolAsync("authors_get",
+                new Dictionary<string, object> { ["authorId"] = input });
 
             // Assert
             result.IsError.ShouldBe(true);

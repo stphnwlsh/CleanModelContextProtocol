@@ -20,19 +20,19 @@ public static class ToolErrorFilter
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                return ToResult(exception);
+                return ToResult(exception, request?.Params?.Name);
             }
         };
     }
 
-    public static CallToolResult ToResult(Exception exception)
+    public static CallToolResult ToResult(Exception exception, string toolName = null)
     {
         var message = exception switch
         {
             ValidationException validationException => "Validation Failed: " + string.Join(" ", validationException.Errors
                 .Select(e => $"{e.PropertyName}: {e.ErrorMessage}")
-                .Distinct()),
-            NotFoundException => $"Not Found: {exception.Message}",
+                .Distinct()) + " Correct the arguments and call the tool again.",
+            NotFoundException => $"Not Found: {exception.Message}{ListToolHint(toolName)}",
             _ => "Error: An error occurred while processing your request."
         };
 
@@ -41,5 +41,19 @@ public static class ToolErrorFilter
             IsError = true,
             Content = [new TextContentBlock { Text = message }]
         };
+    }
+
+    private static string ListToolHint(string toolName)
+    {
+        if (toolName is null)
+        {
+            return string.Empty;
+        }
+
+        var separator = toolName.IndexOf('_');
+
+        return separator > 0
+            ? $" Check the ids, using {toolName[..separator]}_list or the other list tools to find valid ones."
+            : string.Empty;
     }
 }

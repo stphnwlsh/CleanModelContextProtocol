@@ -18,7 +18,7 @@ public abstract class BaseToolTests : IAsyncLifetime, IAsyncDisposable
         this.application = new ModelContextProtocolApplication();
         this.Client = await McpClient.CreateAsync(
             new HttpClientTransport(
-                new HttpClientTransportOptions { Endpoint = new Uri("http://localhost") },
+                new HttpClientTransportOptions { Endpoint = new Uri("http://localhost/mcp") },
                 this.application.CreateClient(),
                 null,
                 false),

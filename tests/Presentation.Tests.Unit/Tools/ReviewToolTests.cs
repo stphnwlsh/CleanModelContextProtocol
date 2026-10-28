@@ -36,7 +36,7 @@ public class ReviewToolTests
             .ReturnsForAnyArgs([SampleReview()]);
 
         // Act
-        var response = await ReviewTools.GetAllReviews(sender);
+        var response = await ReviewTools.ListReviews(sender);
 
         // Assert
         var result = JsonSerializer.Deserialize<List<Entities.Review>>(response, JsonOptions);
@@ -62,7 +62,7 @@ public class ReviewToolTests
             .ReturnsForAnyArgs(SampleReview());
 
         // Act
-        var response = await ReviewTools.GetReviewById(sender, Guid.Empty);
+        var response = await ReviewTools.GetReview(sender, Guid.Empty);
 
         // Assert
         var result = JsonSerializer.Deserialize<Entities.Review>(response, JsonOptions);
