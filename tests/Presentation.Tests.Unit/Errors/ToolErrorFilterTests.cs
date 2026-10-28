@@ -54,7 +54,7 @@ public class ToolErrorFilterTests
         // Assert
         result.IsError.ShouldBe(true);
         result.Content.OfType<TextContentBlock>().Single().Text
-            .ShouldBe("Validation Failed: AuthorId: An author id was not supplied to create the review. Stars: A star rating must be between 1 and 5.");
+            .ShouldBe("Validation Failed: AuthorId: An author id was not supplied to create the review. Stars: A star rating must be between 1 and 5. Correct the arguments and call the tool again.");
     }
 
     [Fact]
@@ -66,6 +66,20 @@ public class ToolErrorFilterTests
         // Assert
         result.IsError.ShouldBe(true);
         result.Content.OfType<TextContentBlock>().Single().Text.ShouldBe("Not Found: Expected Exception");
+    }
+
+    [Theory]
+    [InlineData("movies_get", "Not Found: Expected Exception Check the ids, using movies_list or the other list tools to find valid ones.")]
+    [InlineData("server", "Not Found: Expected Exception")]
+    [InlineData("_get", "Not Found: Expected Exception")]
+    public void ToResult_ShouldReturn_NotFoundErrorWithHint(string toolName, string expected)
+    {
+        // Act
+        var result = ToolErrorFilter.ToResult(new NotFoundException("Expected Exception"), toolName);
+
+        // Assert
+        result.IsError.ShouldBe(true);
+        result.Content.OfType<TextContentBlock>().Single().Text.ShouldBe(expected);
     }
 
     [Fact]
