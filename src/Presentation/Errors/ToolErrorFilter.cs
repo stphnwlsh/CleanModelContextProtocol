@@ -45,7 +45,12 @@ public static class ToolErrorFilter
 
     private static string ListToolHint(string toolName)
     {
-        var separator = toolName?.IndexOf('_') ?? -1;
+        if (toolName is null)
+        {
+            return string.Empty;
+        }
+
+        var separator = toolName.IndexOf('_');
 
         return separator > 0
             ? $" Check the ids, using {toolName[..separator]}_list or the other list tools to find valid ones."
