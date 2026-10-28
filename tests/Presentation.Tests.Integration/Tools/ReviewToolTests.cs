@@ -1,5 +1,6 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Integration.Tools;
 
+using CleanModelContextProtocol.Presentation.Models;
 using Extensions;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
@@ -121,7 +122,7 @@ public class ReviewToolTests : BaseToolTests
     }
 
     [Fact]
-    public async Task UpdateReview_ShouldReturn_Success()
+    public async Task UpdateReview_ShouldReturn_Review()
     {
         // Arrange
         var authorResult = await this.Client.CallToolAsync("authors_list");
@@ -148,12 +149,7 @@ public class ReviewToolTests : BaseToolTests
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
-        text.ShouldBe("Review updated successfully");
-
-        var validateResult = await this.Client.CallToolAsync("reviews_get",
-            new Dictionary<string, object> { ["reviewId"] = existingReview.Id });
-        var validateText = validateResult.Content.OfType<TextContentBlock>().First().Text;
-        var updatedReview = validateText.Deserialize<Entities.Review>();
+        var updatedReview = text.Deserialize<Entities.Review>();
 
         _ = updatedReview.ShouldNotBeNull();
 
@@ -171,7 +167,7 @@ public class ReviewToolTests : BaseToolTests
     }
 
     [Fact]
-    public async Task DeleteReview_ShouldReturn_Success()
+    public async Task DeleteReview_ShouldReturn_Result()
     {
         // Arrange
         var reviewsResult = await this.Client.CallToolAsync("reviews_list");
@@ -184,7 +180,10 @@ public class ReviewToolTests : BaseToolTests
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
-        text.ShouldBe("Review deleted successfully");
+        var deleted = text.Deserialize<DeletedReview>();
+
+        deleted.ReviewId.ShouldBe(existingReview.Id);
+        deleted.Deleted.ShouldBeTrue();
 
         var validateResult = await this.Client.CallToolAsync("reviews_get",
             new Dictionary<string, object> { ["reviewId"] = existingReview.Id });

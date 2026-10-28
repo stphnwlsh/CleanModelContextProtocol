@@ -11,7 +11,7 @@ using Queries = Application.Versions.Queries;
 public class VersionToolTests
 {
     [Fact]
-    public async Task GetVersion_ShouldReturn_MarkdownTable()
+    public async Task GetVersion_ShouldReturn_Version()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
@@ -28,7 +28,7 @@ public class VersionToolTests
         var response = await VersionTools.GetVersion(sender);
 
         // Assert
-        response.ShouldContain("| File Version | 1.2.3.4 |");
-        response.ShouldContain("| Informational Version | 5.6.7.8 |");
+        response.FileVersion.ShouldBe("1.2.3.4");
+        response.InformationalVersion.ShouldBe("5.6.7.8");
     }
 }

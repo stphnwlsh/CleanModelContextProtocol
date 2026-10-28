@@ -5,6 +5,7 @@ using Application.Authors.Entities;
 using Application.Movies.Entities;
 using Application.Reviews.Entities;
 using Application.Versions.Entities;
+using CleanModelContextProtocol.Presentation.Models;
 
 /// <summary>
 /// JSON serialization context for compile-time source generation.
@@ -26,6 +27,7 @@ using Application.Versions.Entities;
 [JsonSerializable(typeof(ReviewedMovie))]
 [JsonSerializable(typeof(Version))]
 [JsonSerializable(typeof(List<Version>))]
+[JsonSerializable(typeof(DeletedReview))]
 public partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }

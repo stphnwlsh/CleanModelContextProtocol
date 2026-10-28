@@ -1,6 +1,5 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Tools;
 
-using System.Text.Json;
 using CleanModelContextProtocol.Presentation.Tools;
 using Mediator;
 using NSubstitute;
@@ -11,10 +10,8 @@ using Queries = Application.Authors.Queries;
 
 public class AuthorToolTests
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
-
     [Fact]
-    public async Task GetAllAuthors_ShouldReturn_JsonResult()
+    public async Task GetAllAuthors_ShouldReturn_Result()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
@@ -30,7 +27,7 @@ public class AuthorToolTests
         var response = await AuthorTools.ListAuthors(sender);
 
         // Assert
-        var result = JsonSerializer.Deserialize<List<Entities.Author>>(response, JsonOptions);
+        var result = response;
 
         result.ShouldNotBeNull();
         result[0].Id.ShouldBe(Guid.Empty);
@@ -40,7 +37,7 @@ public class AuthorToolTests
     }
 
     [Fact]
-    public async Task GetAuthorById_ShouldReturn_JsonResult()
+    public async Task GetAuthorById_ShouldReturn_Result()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
@@ -53,7 +50,7 @@ public class AuthorToolTests
         var response = await AuthorTools.GetAuthor(sender, Guid.Empty);
 
         // Assert
-        var result = JsonSerializer.Deserialize<Entities.Author>(response, JsonOptions);
+        var result = response;
 
         result.ShouldNotBeNull();
         result.Id.ShouldBe(Guid.Empty);

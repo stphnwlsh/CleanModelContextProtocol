@@ -50,6 +50,8 @@ public class ToolListTests : BaseToolTests
             tool.Annotations.DestructiveHint.ShouldBe(destructive);
         }
 
+        _ = tool.OutputSchema.ShouldNotBeNull();
+
         foreach (var property in tool.InputSchema.GetProperty("properties").EnumerateObject())
         {
             property.Value.GetProperty("description").GetString().ShouldNotBeNullOrWhiteSpace();

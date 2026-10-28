@@ -78,6 +78,7 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 - Logging using [Serilog](https://github.com/serilog/serilog), with [Seq](https://datalust.co/seq) when running in Docker
 - Mediator pattern using [Mediator](https://github.com/martinothamar/Mediator)
 - Validation using [FluentValidation](https://github.com/FluentValidation/FluentValidation) in an Application pipeline behaviour
+- Typed tool results published with an output schema and returned as structured content as well as JSON text
 - Tool errors mapped from Application exceptions by a single call-tool filter, with messages that tell the agent how to recover
 - Object mapping using [Mapperly](https://mapperly.riok.app)
 - In-memory data using [Entity Framework Core](https://learn.microsoft.com/ef/core/providers/in-memory/) seeded with [Bogus](https://github.com/bchavez/Bogus)
