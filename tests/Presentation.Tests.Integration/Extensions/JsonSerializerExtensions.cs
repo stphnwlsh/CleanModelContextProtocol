@@ -17,11 +17,6 @@ public static class JsonSerializerExtensions
         }
     };
 
-    public static string Serialize(this object input)
-    {
-        return JsonSerializer.Serialize(input, Options);
-    }
-
     public static T Deserialize<T>(this string input)
     {
         return JsonSerializer.Deserialize<T>(input, Options);
