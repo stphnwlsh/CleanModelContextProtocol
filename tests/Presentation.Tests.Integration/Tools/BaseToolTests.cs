@@ -9,7 +9,7 @@ using Xunit;
 public abstract class BaseToolTests : IAsyncLifetime, IAsyncDisposable
 {
 #pragma warning disable CS8618
-    private readonly ModelContextProtocolApplication application;
+    private ModelContextProtocolApplication application;
     private bool disposed;
 
     protected McpClient Client { get; private set; }
