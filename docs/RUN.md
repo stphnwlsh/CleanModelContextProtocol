@@ -12,13 +12,14 @@ dotnet run --project ./src/Presentation
 
 ## Docker Compose
 
-`docker-compose.yml` starts the app and a Seq container for logs.
+`docker-compose.yml` starts the app, the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) already pointed at it, and a Seq container for logs.
 
 ``` bash
 docker compose up -d --build
 ```
 
-- App: <http://localhost:8080> (MCP endpoint (connect with an MCP client such as the [MCP Inspector](https://github.com/modelcontextprotocol/inspector)))
+- App: <http://localhost:8080> (MCP endpoint, Streamable HTTP)
+- MCP Inspector: <http://localhost:6274>. Flip the switch on the server card to connect, then open **Tools** to see every tool with its description and input schema and run it.
 - Seq: <http://localhost:5341>
 
 To shut the containers down:

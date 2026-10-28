@@ -49,7 +49,7 @@ dotnet new cleanmodelcontextprotocol --name {YOUR_SOLUTION_NAMESPACE} --author "
 docker compose up -d
 ```
 
-Then open the MCP endpoint (connect with an MCP client such as the [MCP Inspector](https://github.com/modelcontextprotocol/inspector)) at <http://localhost:8080>. See [docs/RUN.md](docs/RUN.md) for every way to run it.
+Then open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) at <http://localhost:6274>. It's already pointed at the MCP endpoint (<http://localhost:8080>), so connect and open **Tools** to browse and run them. See [docs/RUN.md](docs/RUN.md) for every way to run it.
 
 The `Dockerfile` has stages for testing, publishing and running, so you can build just the part you need. You can also stamp a version into the assembly.
 
