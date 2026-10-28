@@ -1,5 +1,8 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Tools;
 
+using Application.Common.Paging;
+using Application.Movies.Entities;
+using Application.Reviews.Entities;
 using CleanModelContextProtocol.Presentation.Tools;
 using Mediator;
 using NSubstitute;
@@ -11,51 +14,45 @@ using Queries = Application.Authors.Queries;
 public class AuthorToolTests
 {
     [Fact]
-    public async Task GetAllAuthors_ShouldReturn_Result()
+    public async Task SearchAuthors_ShouldReturn_ConcisePage()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
+        var author = new Entities.Author(Guid.Empty, "Lorem", "Ipsum", [new Review(Guid.Empty, 4, new ReviewedMovie(Guid.Empty, "Dolor"))]);
 
         _ = sender
-            .Send(Arg.Any<Queries.GetAuthors.GetAuthorsQuery>())
-            .ReturnsForAnyArgs(
-            [
-                new Entities.Author(Guid.Empty, "Lorem", "Ipsum")
-            ]);
+            .Send(Arg.Is<Queries.SearchAuthors.SearchAuthorsQuery>(q => q.Query == "lorem" && q.Limit == 10 && q.Cursor == null))
+            .Returns(new Page<Entities.Author>([author], 1));
 
         // Act
-        var response = await AuthorTools.ListAuthors(sender);
+        var response = await AuthorTools.SearchAuthors(sender, "lorem");
 
         // Assert
-        var result = response;
-
-        result.ShouldNotBeNull();
-        result[0].Id.ShouldBe(Guid.Empty);
-        result[0].FirstName.ShouldBe("Lorem");
-        result[0].LastName.ShouldBe("Ipsum");
-        result[0].Reviews.ShouldBeNull();
+        response.TotalCount.ShouldBe(1);
+        response.NextCursor.ShouldBeNull();
+        response.Items[0].Name.ShouldBe("Lorem Ipsum");
+        response.Items[0].ReviewCount.ShouldBe(1);
+        response.Items[0].AverageStars.ShouldBe(4);
+        response.Items[0].Reviews.ShouldBeNull();
     }
 
     [Fact]
-    public async Task GetAuthorById_ShouldReturn_Result()
+    public async Task SearchAuthors_ShouldReturn_Reviews()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
+        var author = new Entities.Author(Guid.Empty, "Lorem", "Ipsum", [new Review(Guid.Empty, 4, new ReviewedMovie(Guid.Empty, "Dolor"))]);
 
         _ = sender
-            .Send(Arg.Any<Queries.GetAuthorById.GetAuthorByIdQuery>())
-            .ReturnsForAnyArgs(new Entities.Author(Guid.Empty, "Lorem", "Ipsum"));
+            .Send(Arg.Any<Queries.SearchAuthors.SearchAuthorsQuery>())
+            .ReturnsForAnyArgs(new Page<Entities.Author>([author], 1));
 
         // Act
-        var response = await AuthorTools.GetAuthor(sender, Guid.Empty);
+        var response = await AuthorTools.SearchAuthors(sender, includeReviews: true);
 
         // Assert
-        var result = response;
-
-        result.ShouldNotBeNull();
-        result.Id.ShouldBe(Guid.Empty);
-        result.FirstName.ShouldBe("Lorem");
-        result.LastName.ShouldBe("Ipsum");
-        result.Reviews.ShouldBeNull();
+        response.Items[0].Reviews.Count.ShouldBe(1);
+        response.Items[0].Reviews[0].MovieTitle.ShouldBe("Dolor");
+        response.Items[0].Reviews[0].AuthorName.ShouldBe("Lorem Ipsum");
     }
 }

@@ -28,6 +28,12 @@ using CleanModelContextProtocol.Presentation.Models;
 [JsonSerializable(typeof(Version))]
 [JsonSerializable(typeof(List<Version>))]
 [JsonSerializable(typeof(DeletedReview))]
+[JsonSerializable(typeof(MovieResult))]
+[JsonSerializable(typeof(AuthorResult))]
+[JsonSerializable(typeof(ReviewResult))]
+[JsonSerializable(typeof(ResultPage<MovieResult>))]
+[JsonSerializable(typeof(ResultPage<AuthorResult>))]
+[JsonSerializable(typeof(ResultPage<ReviewResult>))]
 public partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }

@@ -7,14 +7,11 @@ public class ToolListTests : BaseToolTests
 {
     public static TheoryData<string, string, bool, bool, bool> Tools => new()
     {
-        { "authors_list", "List authors", true, false, true },
-        { "authors_get", "Get author", true, false, true },
-        { "movies_list", "List movies", true, false, true },
+        { "movies_search", "Search movies", true, false, true },
         { "movies_get", "Get movie", true, false, true },
+        { "authors_search", "Search authors", true, false, true },
         { "reviews_list", "List reviews", true, false, true },
-        { "reviews_get", "Get review", true, false, true },
-        { "reviews_create", "Create review", false, false, false },
-        { "reviews_update", "Update review", false, true, true },
+        { "reviews_write", "Write review", false, true, false },
         { "reviews_delete", "Delete review", false, true, true },
         { "server_get_version", "Get server version", true, false, true }
     };

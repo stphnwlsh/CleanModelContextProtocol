@@ -74,7 +74,8 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 ## Features
 
 - MCP server using the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk), stateless Streamable HTTP at `/mcp`
-- Tools named by resource (`movies_list`, `reviews_create`) with titles, read-only, destructive and idempotent hints, and descriptions written for agents
+- Six task-shaped tools (`movies_search`, `movies_get`, `authors_search`, `reviews_list`, `reviews_write`, `reviews_delete`) with titles, read-only, destructive and idempotent hints, and descriptions written for agents
+- Search with paging and small results by default: every list returns 10 items, a total count and a cursor, with names and average ratings next to ids
 - Logging using [Serilog](https://github.com/serilog/serilog), with [Seq](https://datalust.co/seq) when running in Docker
 - Mediator pattern using [Mediator](https://github.com/martinothamar/Mediator)
 - Validation using [FluentValidation](https://github.com/FluentValidation/FluentValidation) in an Application pipeline behaviour
