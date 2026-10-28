@@ -1,6 +1,7 @@
 namespace CleanModelContextProtocol.Presentation.Extensions;
 
 using System.Diagnostics.CodeAnalysis;
+using CleanModelContextProtocol.Presentation.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Serilog;
 
@@ -17,7 +18,14 @@ public static class WebApplicationExtensions
 
         #region Model Context Protocol
 
-        _ = app.MapMcp("/mcp");
+        var mcp = app.MapMcp("/mcp");
+
+        if (AuthenticationSettings.FromConfiguration(app.Configuration).Enabled)
+        {
+            _ = app.UseAuthentication();
+            _ = app.UseAuthorization();
+            _ = mcp.RequireAuthorization();
+        }
 
         #endregion Model Context Protocol
 

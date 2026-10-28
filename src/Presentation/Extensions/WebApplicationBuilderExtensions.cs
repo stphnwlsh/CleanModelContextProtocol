@@ -3,12 +3,15 @@ namespace CleanModelContextProtocol.Presentation.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Application;
+using CleanModelContextProtocol.Presentation.Authentication;
 using CleanModelContextProtocol.Presentation.Completions;
 using CleanModelContextProtocol.Presentation.Errors;
 using CleanModelContextProtocol.Presentation.Serialization;
 using Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using ModelContextProtocol.AspNetCore.Authentication;
 using Serilog;
 
 [ExcludeFromCodeCoverage]
@@ -37,6 +40,36 @@ public static class WebApplicationBuilderExtensions
         _ = builder.Services.AddApplication();
 
         #endregion Project Dependencies
+
+        #region Authentication
+
+        var authentication = AuthenticationSettings.FromConfiguration(builder.Configuration);
+
+        if (authentication.Enabled)
+        {
+            _ = builder.Services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = McpAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = authentication.Authority;
+                    options.Audience = authentication.Audience;
+                    options.MapInboundClaims = false;
+                })
+                .AddMcp(options => options.ResourceMetadata = new()
+                {
+                    Resource = authentication.Audience,
+                    AuthorizationServers = [authentication.Authority],
+                    ScopesSupported = authentication.Scopes,
+                    ResourceName = "Clean Model Context Protocol"
+                });
+            _ = builder.Services.AddAuthorization();
+        }
+
+        #endregion Authentication
 
         #region Model Context Protocol
 

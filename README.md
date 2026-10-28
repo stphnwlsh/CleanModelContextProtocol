@@ -43,6 +43,16 @@ dotnet new install CleanModelContextProtocol.Template
 dotnet new cleanmodelcontextprotocol --name {YOUR_SOLUTION_NAMESPACE} --author "{YOUR_NAME}"
 ```
 
+### Protect the server with OAuth (optional)
+
+The server runs without authentication unless you give it an authorization server. Pass one when you create the solution, or set `Authentication:Authority` and `Authentication:Audience` in `appsettings.json` later.
+
+``` bash
+dotnet new cleanmodelcontextprotocol --name {YOUR_SOLUTION_NAMESPACE} --authority https://{YOUR_AUTHORIZATION_SERVER} --audience https://{YOUR_SERVER_URL}
+```
+
+With an authority set, `/mcp` needs a bearer token issued for the audience, and the server publishes [protected resource metadata](https://modelcontextprotocol.io/specification/latest/basic/authorization) at `/.well-known/oauth-protected-resource/mcp` so MCP clients can find the authorization server and sign in. List the scopes clients should ask for in `Authentication:Scopes`.
+
 ## Running the project
 
 ``` bash
@@ -84,6 +94,7 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 - Resources for each movie, author and review (`movies://{movieId}`, `authors://{authorId}`, `reviews://{reviewId}`) and the server version (`server://version`)
 - Prompts for common jobs (`summarise_movie_reception`, `compare_movies`, `review_movie`) that embed the movies they're about, with completions that suggest movie titles and author names as you type
 - Search with paging and small results by default: every list returns 10 items, a total count and a cursor, with names and average ratings next to ids
+- Optional OAuth protection for `/mcp`: JWT bearer tokens plus MCP protected resource metadata, turned on by setting an authority
 - Logging using [Serilog](https://github.com/serilog/serilog), with [Seq](https://datalust.co/seq) when running in Docker
 - Mediator pattern using [Mediator](https://github.com/martinothamar/Mediator)
 - Validation using [FluentValidation](https://github.com/FluentValidation/FluentValidation) in an Application pipeline behaviour
