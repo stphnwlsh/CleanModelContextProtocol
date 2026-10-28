@@ -13,7 +13,7 @@ public class MovieToolTests : BaseToolTests
     public async Task GetAllMovies_ShouldReturn_Movies()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetAllMovies");
+        var result = await this.Client.CallToolAsync("movies_list");
         var text = result.Content.OfType<TextContentBlock>().First().Text;
         var movies = text.Deserialize<List<Entities.Movie>>();
 
@@ -49,13 +49,13 @@ public class MovieToolTests : BaseToolTests
     public async Task GetMovieById_ShouldReturn_Movie()
     {
         // Arrange
-        var allResult = await this.Client.CallToolAsync("GetAllMovies");
+        var allResult = await this.Client.CallToolAsync("movies_list");
         var allText = allResult.Content.OfType<TextContentBlock>().First().Text;
         var firstMovie = allText.Deserialize<List<Entities.Movie>>().First(m => m.Reviews?.Count > 0);
 
         // Act
-        var result = await this.Client.CallToolAsync("GetMovieById",
-            new Dictionary<string, object> { ["id"] = firstMovie.Id });
+        var result = await this.Client.CallToolAsync("movies_get",
+            new Dictionary<string, object> { ["movieId"] = firstMovie.Id });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
         var movie = text.Deserialize<Entities.Movie>();
 
@@ -85,26 +85,26 @@ public class MovieToolTests : BaseToolTests
     public async Task GetMovieById_WithEmptyId_ShouldReturn_ValidationError()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetMovieById",
-            new Dictionary<string, object> { ["id"] = Guid.Empty });
+        var result = await this.Client.CallToolAsync("movies_get",
+            new Dictionary<string, object> { ["movieId"] = Guid.Empty });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
         result.IsError.ShouldBe(true);
-        text.ShouldBe("Validation Failed: Id: A Movie Id was not supplied.");
+        text.ShouldBe("Validation Failed: Id: A Movie Id was not supplied. Correct the arguments and call the tool again.");
     }
 
     [Fact]
     public async Task GetMovieById_WithUnknownId_ShouldReturn_NotFoundError()
     {
         // Act
-        var result = await this.Client.CallToolAsync("GetMovieById",
-            new Dictionary<string, object> { ["id"] = Guid.NewGuid() });
+        var result = await this.Client.CallToolAsync("movies_get",
+            new Dictionary<string, object> { ["movieId"] = Guid.NewGuid() });
         var text = result.Content.OfType<TextContentBlock>().First().Text;
 
         // Assert
         result.IsError.ShouldBe(true);
-        text.ShouldBe("Not Found: The Movie with the supplied id was not found.");
+        text.ShouldBe("Not Found: The Movie with the supplied id was not found. Check the ids, using movies_list or the other list tools to find valid ones.");
     }
 
     [Theory]
@@ -115,8 +115,8 @@ public class MovieToolTests : BaseToolTests
         try
         {
             // Act
-            var result = await this.Client.CallToolAsync("GetMovieById",
-                new Dictionary<string, object> { ["id"] = input });
+            var result = await this.Client.CallToolAsync("movies_get",
+                new Dictionary<string, object> { ["movieId"] = input });
 
             // Assert
             result.IsError.ShouldBe(true);

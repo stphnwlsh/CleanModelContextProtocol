@@ -27,7 +27,7 @@ public class AuthorToolTests
             ]);
 
         // Act
-        var response = await AuthorTools.GetAllAuthors(sender);
+        var response = await AuthorTools.ListAuthors(sender);
 
         // Assert
         var result = JsonSerializer.Deserialize<List<Entities.Author>>(response, JsonOptions);
@@ -50,7 +50,7 @@ public class AuthorToolTests
             .ReturnsForAnyArgs(new Entities.Author(Guid.Empty, "Lorem", "Ipsum"));
 
         // Act
-        var response = await AuthorTools.GetAuthorById(sender, Guid.Empty);
+        var response = await AuthorTools.GetAuthor(sender, Guid.Empty);
 
         // Assert
         var result = JsonSerializer.Deserialize<Entities.Author>(response, JsonOptions);
