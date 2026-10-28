@@ -27,8 +27,7 @@ public class MovieToolTests : BaseToolTests
 
             if (movie.ReviewCount > 0)
             {
-                _ = movie.AverageStars.ShouldNotBeNull();
-                movie.AverageStars.Value.ShouldBeInRange(1, 5);
+                movie.AverageStars.ShouldNotBeNull().ShouldBeInRange(1, 5);
             }
         }
     }
