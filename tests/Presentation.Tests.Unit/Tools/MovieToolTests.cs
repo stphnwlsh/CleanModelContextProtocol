@@ -32,7 +32,7 @@ public class MovieToolTests
 
         _ = sender
             .Send(Arg.Is<Queries.GetMovies.GetMoviesQuery>(q => q.Query == "lorem" && q.Offset == 5 && q.Limit == 1))
-            .Returns(new Page<Entities.Movie>([SampleMovie()], 5, 1, 7));
+            .Returns(new Page<Entities.MovieSummary>([new Entities.MovieSummary(MovieId, "Lorem Ipsum", 2, 3.5)], 5, 1, 7));
 
         // Act
         var response = await MovieTools.SearchMovies(sender, CancellationToken.None, "lorem", 5, 1);
@@ -46,6 +46,7 @@ public class MovieToolTests
         response.Items[0].ReviewCount.ShouldBe(2);
         response.Items[0].AverageStars.ShouldBe(3.5);
         response.Items[0].Reviews.ShouldBeNull();
+        _ = await sender.DidNotReceive().Send(Arg.Any<Application.Reviews.Queries.GetReviewsForMovies.GetReviewsForMoviesQuery>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -56,7 +57,11 @@ public class MovieToolTests
 
         _ = sender
             .Send(Arg.Any<Queries.GetMovies.GetMoviesQuery>())
-            .ReturnsForAnyArgs(new Page<Entities.Movie>([SampleMovie(), new Entities.Movie(Guid.Empty, "Empty")], 0, 10, 2));
+            .ReturnsForAnyArgs(new Page<Entities.MovieSummary>(
+                [new Entities.MovieSummary(MovieId, "Lorem Ipsum", 2, 3.5), new Entities.MovieSummary(Guid.Empty, "Empty", 0, null)], 0, 10, 2));
+        _ = sender
+            .Send(Arg.Is<Application.Reviews.Queries.GetReviewsForMovies.GetReviewsForMoviesQuery>(q => q.MovieIds.SequenceEqual(new[] { MovieId, Guid.Empty })))
+            .Returns(new Dictionary<Guid, List<Review>> { [MovieId] = [.. SampleMovie().Reviews], [Guid.Empty] = [] });
 
         // Act
         var response = await MovieTools.SearchMovies(sender, CancellationToken.None, includeReviews: true);
@@ -68,6 +73,24 @@ public class MovieToolTests
         response.Items[1].ReviewCount.ShouldBe(0);
         response.Items[1].AverageStars.ShouldBeNull();
         response.Items[1].Reviews.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task SearchMovies_ShouldSkip_Reviews_WhenPageIsEmpty()
+    {
+        // Arrange
+        var sender = Substitute.For<ISender>();
+
+        _ = sender
+            .Send(Arg.Any<Queries.GetMovies.GetMoviesQuery>())
+            .ReturnsForAnyArgs(new Page<Entities.MovieSummary>([], 0, 10, 0));
+
+        // Act
+        var response = await MovieTools.SearchMovies(sender, CancellationToken.None, "missing", includeReviews: true);
+
+        // Assert
+        response.Items.ShouldBeEmpty();
+        _ = await sender.DidNotReceive().Send(Arg.Any<Application.Reviews.Queries.GetReviewsForMovies.GetReviewsForMoviesQuery>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

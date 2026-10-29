@@ -101,7 +101,15 @@ public static class MoviePrompts
         var movie = page.Items.FirstOrDefault(m => string.Equals(m.Title, title?.Trim(), StringComparison.OrdinalIgnoreCase))
             ?? (page.TotalCount == 1 ? page.Items[0] : null);
 
-        return movie?.ToResult(includeReviews: true);
+        if (movie is null)
+        {
+            return null;
+        }
+
+        // The search only has the review count and average, so get the movie again for its reviews.
+        var withReviews = await sender.Send(new Queries.GetMovieById.GetMovieByIdQuery { Id = movie.Id }, cancellationToken);
+
+        return withReviews.ToResult(includeReviews: true);
     }
 
     private static PromptMessage Text(string text)

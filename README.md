@@ -95,10 +95,13 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 - Typed tool results published with an output schema and returned as structured content as well as JSON text
 - Errors mapped from Application exceptions by request filters: tool errors tell the agent how to recover, and resources and prompts return MCP protocol errors such as resource not found
 - Object mapping using [Mapperly](https://mapperly.riok.app)
-- Data stored in [SQLite](https://learn.microsoft.com/ef/core/providers/sqlite/) using [Entity Framework Core](https://learn.microsoft.com/ef/core) migrations, seeded with [Bogus](https://github.com/bchavez/Bogus). Tests use a throwaway in-memory SQLite database, so they never touch a real one
+- Data stored in [SQLite](https://learn.microsoft.com/ef/core/providers/sqlite/) using [Entity Framework Core](https://learn.microsoft.com/ef/core) migrations, seeded with [Bogus](https://github.com/bchavez/Bogus) only when `Database:SeedSampleData` is on. Each test uses its own throwaway in-memory SQLite database, so tests never touch a real one or each other's data
 - Testing using [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet)
-- CI with GitHub Actions: build and test, 95% coverage gate, [Trivy](https://trivy.dev) container scan, [CodeQL](https://codeql.github.com) static analysis, then NuGet publishing and a GitHub release from `main` using [trusted publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
-- Monthly grouped dependency updates using [Dependabot](https://docs.github.com/code-security/dependabot)
+- Build rules in `Directory.Build.props`: code style and the recommended analyzers are checked on every build, warnings fail it, and package versions live in one place with [Central Package Management](https://learn.microsoft.com/nuget/consume-packages/central-package-management)
+- CI with GitHub Actions: build and test, a `dotnet format` check, 95% coverage gate, [Trivy](https://trivy.dev) container scan, [CodeQL](https://codeql.github.com) static analysis, then NuGet publishing and a GitHub release from `main` using [trusted publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+- Health checks at `/health/live` and `/health/ready`, using [ASP.NET Core health checks](https://learn.microsoft.com/aspnet/core/host-and-deploy/health-checks)
+- Monthly grouped dependency updates using [Dependabot](https://docs.github.com/code-security/dependabot), including the pinned Seq image
+- A Docker image that runs as a non-root user with a health check
 
 ## Related templates
 

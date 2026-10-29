@@ -5,6 +5,7 @@ using CleanModelContextProtocol.Presentation.Models;
 using Mediator;
 using ModelContextProtocol.Server;
 using Queries = Application.Authors.Queries;
+using Reviews = Application.Reviews.Queries;
 
 [McpServerToolType]
 public static class AuthorTools
@@ -28,6 +29,17 @@ public static class AuthorTools
             Limit = limit
         }, cancellationToken);
 
-        return page.ToResult(a => a.ToResult(includeReviews));
+        if (!includeReviews || page.Items.Count == 0)
+        {
+            return page.ToResult(a => a.ToResult());
+        }
+
+        // One query gets the reviews of the whole page.
+        var reviews = await sender.Send(new Reviews.GetReviewsForAuthors.GetReviewsForAuthorsQuery
+        {
+            AuthorIds = [.. page.Items.Select(a => a.Id)]
+        }, cancellationToken);
+
+        return page.ToResult(a => a.ToResult(reviews[a.Id]));
     }
 }

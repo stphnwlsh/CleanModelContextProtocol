@@ -5,6 +5,7 @@ using CleanModelContextProtocol.Presentation.Models;
 using Mediator;
 using ModelContextProtocol.Server;
 using Queries = Application.Movies.Queries;
+using Reviews = Application.Reviews.Queries;
 
 [McpServerToolType]
 public static class MovieTools
@@ -28,7 +29,18 @@ public static class MovieTools
             Limit = limit
         }, cancellationToken);
 
-        return page.ToResult(m => m.ToResult(includeReviews));
+        if (!includeReviews || page.Items.Count == 0)
+        {
+            return page.ToResult(m => m.ToResult());
+        }
+
+        // One query gets the reviews of the whole page.
+        var reviews = await sender.Send(new Reviews.GetReviewsForMovies.GetReviewsForMoviesQuery
+        {
+            MovieIds = [.. page.Items.Select(m => m.Id)]
+        }, cancellationToken);
+
+        return page.ToResult(m => m.ToResult(reviews[m.Id]));
     }
 
     [McpServerTool(Name = "movies_get", Title = "Get movie", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
