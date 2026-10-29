@@ -30,15 +30,15 @@ public class ReviewToolTests
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Is<Queries.SearchReviews.SearchReviewsQuery>(q => q.MovieId == MovieId && q.AuthorId == AuthorId && q.Limit == 2 && q.Cursor == "abc"))
-            .Returns(new Page<Entities.Review>([SampleReview()], 3, "next"));
+            .Send(Arg.Is<Queries.GetReviews.GetReviewsQuery>(q => q.MovieId == MovieId && q.AuthorId == AuthorId && q.Offset == 2 && q.Limit == 1))
+            .Returns(new Page<Entities.Review>([SampleReview()], 2, 1, 3));
 
         // Act
-        var response = await ReviewTools.ListReviews(sender, MovieId, AuthorId, null, 2, "abc");
+        var response = await ReviewTools.ListReviews(sender, CancellationToken.None, MovieId, AuthorId, null, 2, 1);
 
         // Assert
         response.TotalCount.ShouldBe(3);
-        response.NextCursor.ShouldBe("next");
+        response.NextOffset.ShouldBeNull();
         response.Items[0].Id.ShouldBe(ReviewId);
         response.Items[0].Stars.ShouldBe(5);
         response.Items[0].MovieId.ShouldBe(MovieId);
@@ -58,13 +58,13 @@ public class ReviewToolTests
             .Returns(SampleReview());
 
         // Act
-        var response = await ReviewTools.ListReviews(sender, reviewId: ReviewId);
+        var response = await ReviewTools.ListReviews(sender, CancellationToken.None, reviewId: ReviewId);
 
         // Assert
         response.TotalCount.ShouldBe(1);
-        response.NextCursor.ShouldBeNull();
+        response.NextOffset.ShouldBeNull();
         response.Items.Single().Id.ShouldBe(ReviewId);
-        _ = await sender.DidNotReceive().Send(Arg.Any<Queries.SearchReviews.SearchReviewsQuery>());
+        _ = await sender.DidNotReceive().Send(Arg.Any<Queries.GetReviews.GetReviewsQuery>());
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class ReviewToolTests
             .Returns(SampleReview(4));
 
         // Act
-        var response = await ReviewTools.WriteReview(sender, MovieId, AuthorId, 4);
+        var response = await ReviewTools.WriteReview(sender, 4, CancellationToken.None, MovieId, AuthorId);
 
         // Assert
         response.Id.ShouldBe(ReviewId);
@@ -87,13 +87,31 @@ public class ReviewToolTests
     }
 
     [Fact]
-    public async Task WriteReview_ShouldUpdate_Review()
+    public async Task WriteReview_ShouldSend_EmptyIds_WhenMovieAndAuthorAreMissing()
     {
         // Arrange
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Is<Commands.UpdateReview.UpdateReviewCommand>(c => c.Id == ReviewId && c.MovieId == MovieId && c.AuthorId == AuthorId && c.Stars == 2))
+            .Send(Arg.Is<Commands.CreateReview.CreateReviewCommand>(c => c.MovieId == Guid.Empty && c.AuthorId == Guid.Empty && c.Stars == 4))
+            .Returns(SampleReview(4));
+
+        // Act
+        var response = await ReviewTools.WriteReview(sender, 4, CancellationToken.None);
+
+        // Assert
+        response.Stars.ShouldBe(4);
+        _ = await sender.Received(1).Send(Arg.Any<Commands.CreateReview.CreateReviewCommand>());
+    }
+
+    [Fact]
+    public async Task WriteReview_ShouldUpdate_OnlyTheStars()
+    {
+        // Arrange
+        var sender = Substitute.For<ISender>();
+
+        _ = sender
+            .Send(Arg.Is<Commands.UpdateReview.UpdateReviewCommand>(c => c.Id == ReviewId && c.Stars == 2))
             .Returns(true);
 
         _ = sender
@@ -101,7 +119,7 @@ public class ReviewToolTests
             .Returns(SampleReview(2));
 
         // Act
-        var response = await ReviewTools.WriteReview(sender, MovieId, AuthorId, 2, ReviewId);
+        var response = await ReviewTools.WriteReview(sender, 2, CancellationToken.None, reviewId: ReviewId);
 
         // Assert
         response.Id.ShouldBe(ReviewId);
@@ -120,7 +138,7 @@ public class ReviewToolTests
             .Returns(true);
 
         // Act
-        var response = await ReviewTools.DeleteReview(sender, ReviewId);
+        var response = await ReviewTools.DeleteReview(sender, ReviewId, CancellationToken.None);
 
         // Assert
         response.ReviewId.ShouldBe(ReviewId);

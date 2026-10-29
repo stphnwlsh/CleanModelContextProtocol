@@ -49,7 +49,7 @@ public class ResourceTests : BaseToolTests
     {
         // Arrange
         var first = (await this.CallAsync<ResultPage<MovieResult>>("movies_search",
-            new Dictionary<string, object> { ["limit"] = 50 })).Items.First(m => m.ReviewCount > 0);
+            new Dictionary<string, object?> { ["limit"] = 50 })).Items.First(m => m.ReviewCount > 0);
 
         // Act
         var movie = await this.ReadAsync<MovieResult>($"movies://{first.Id}");
@@ -57,7 +57,7 @@ public class ResourceTests : BaseToolTests
         // Assert
         movie.Id.ShouldBe(first.Id);
         movie.Title.ShouldBe(first.Title);
-        movie.Reviews.Count.ShouldBe(first.ReviewCount);
+        movie.Reviews.ShouldNotBeNull().Count.ShouldBe(first.ReviewCount);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class ResourceTests : BaseToolTests
         // Assert
         author.Id.ShouldBe(first.Id);
         author.Name.ShouldBe(first.Name);
-        author.Reviews.Count.ShouldBe(first.ReviewCount);
+        author.Reviews.ShouldNotBeNull().Count.ShouldBe(first.ReviewCount);
     }
 
     [Fact]

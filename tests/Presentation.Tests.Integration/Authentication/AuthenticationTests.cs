@@ -23,7 +23,7 @@ public class AuthenticationTests : IDisposable
     private static readonly SymmetricSecurityKey SigningKey = new(Encoding.UTF8.GetBytes("a-test-signing-key-that-is-long-enough-for-hs256"));
 
     private readonly ModelContextProtocolApplication application = new(
-        settings: new Dictionary<string, string>
+        settings: new Dictionary<string, string?>
         {
             ["Authentication:Authority"] = Authority,
             ["Authentication:Audience"] = Audience,
@@ -64,9 +64,9 @@ public class AuthenticationTests : IDisposable
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         using var metadata = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-        metadata.RootElement.GetProperty("resource").GetString().ShouldBe(Audience);
-        metadata.RootElement.GetProperty("authorization_servers")[0].GetString().ShouldBe(Authority);
-        metadata.RootElement.GetProperty("scopes_supported")[0].GetString().ShouldBe("mcp:tools");
+        metadata.RootElement.GetProperty("resource").GetString()!.ShouldBe(Audience);
+        metadata.RootElement.GetProperty("authorization_servers")[0].GetString()!.ShouldBe(Authority);
+        metadata.RootElement.GetProperty("scopes_supported")[0].GetString()!.ShouldBe("mcp:tools");
     }
 
     [Fact]

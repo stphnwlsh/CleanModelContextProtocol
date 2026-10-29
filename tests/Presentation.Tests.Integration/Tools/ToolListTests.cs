@@ -60,7 +60,7 @@ public class ToolListTests : BaseToolTests
         // Assert
         var serverInfo = this.Client.ServerInfo;
 
-        serverInfo.Name.ShouldBe("clean-model-context-protocol");
+        serverInfo.ShouldNotBeNull().Name.ShouldBe("clean-model-context-protocol");
         serverInfo.Title.ShouldBe("Clean Model Context Protocol");
         this.Client.ServerInstructions.ShouldNotBeNullOrWhiteSpace();
 

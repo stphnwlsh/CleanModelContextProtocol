@@ -15,7 +15,7 @@ public abstract class BaseToolTests : IAsyncLifetime, IAsyncDisposable
     protected McpClient Client { get; private set; }
 #pragma warning restore CS8618
 
-    protected async Task<T> CallAsync<T>(string name, Dictionary<string, object> arguments = null)
+    protected async Task<T> CallAsync<T>(string name, Dictionary<string, object?>? arguments = null)
     {
         var result = await this.Client.CallToolAsync(name, arguments);
 
@@ -24,7 +24,7 @@ public abstract class BaseToolTests : IAsyncLifetime, IAsyncDisposable
         return result.Content.OfType<TextContentBlock>().First().Text.Deserialize<T>();
     }
 
-    protected async Task<string> CallForErrorAsync(string name, Dictionary<string, object> arguments)
+    protected async Task<string> CallForErrorAsync(string name, Dictionary<string, object?> arguments)
     {
         var result = await this.Client.CallToolAsync(name, arguments);
 

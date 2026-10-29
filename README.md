@@ -87,7 +87,7 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 - Six task-shaped tools (`movies_search`, `movies_get`, `authors_search`, `reviews_list`, `reviews_write`, `reviews_delete`) with titles, read-only, destructive and idempotent hints, and descriptions written for agents
 - Resources for each movie, author and review (`movies://{movieId}`, `authors://{authorId}`, `reviews://{reviewId}`) and the server version (`server://version`)
 - Prompts for common jobs (`summarise_movie_reception`, `compare_movies`, `review_movie`) that embed the movies they're about, with completions that suggest movie titles and author names as you type
-- Search with paging and small results by default: every list returns 10 items, a total count and a cursor, with names and average ratings next to ids
+- Search with paging and small results by default: every list returns 10 items, a total count and the offset of the next page, with names and average ratings next to ids
 - Optional OAuth protection for `/mcp`: JWT bearer tokens plus MCP protected resource metadata, turned on by setting an authority
 - Logging using [Serilog](https://github.com/serilog/serilog), with [Seq](https://datalust.co/seq) when running in Docker
 - Mediator pattern using [Mediator](https://github.com/martinothamar/Mediator)
@@ -95,10 +95,13 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 - Typed tool results published with an output schema and returned as structured content as well as JSON text
 - Errors mapped from Application exceptions by request filters: tool errors tell the agent how to recover, and resources and prompts return MCP protocol errors such as resource not found
 - Object mapping using [Mapperly](https://mapperly.riok.app)
-- In-memory data using [Entity Framework Core](https://learn.microsoft.com/ef/core/providers/in-memory/) seeded with [Bogus](https://github.com/bchavez/Bogus)
+- Data stored in [SQLite](https://learn.microsoft.com/ef/core/providers/sqlite/) using [Entity Framework Core](https://learn.microsoft.com/ef/core) migrations, seeded with [Bogus](https://github.com/bchavez/Bogus) only when `Database:SeedSampleData` is on. Each test uses its own throwaway in-memory SQLite database, so tests never touch a real one or each other's data
 - Testing using [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet)
-- CI with GitHub Actions: build and test, 95% coverage gate, [Trivy](https://trivy.dev) container scan, [CodeQL](https://codeql.github.com) static analysis, then NuGet publishing and a GitHub release from `main` using [trusted publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
-- Monthly grouped dependency updates using [Dependabot](https://docs.github.com/code-security/dependabot)
+- Build rules in `Directory.Build.props`: code style and the recommended analyzers are checked on every build, warnings fail it, and package versions live in one place with [Central Package Management](https://learn.microsoft.com/nuget/consume-packages/central-package-management)
+- CI with GitHub Actions: build and test, a `dotnet format` check, 95% coverage gate, [Trivy](https://trivy.dev) container scan, [CodeQL](https://codeql.github.com) static analysis, then NuGet publishing and a GitHub release from `main` using [trusted publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+- Health checks at `/health/live` and `/health/ready`, using [ASP.NET Core health checks](https://learn.microsoft.com/aspnet/core/host-and-deploy/health-checks)
+- Monthly grouped dependency updates using [Dependabot](https://docs.github.com/code-security/dependabot), including the pinned Seq image
+- A Docker image that runs as a non-root user with a health check
 
 ## Related templates
 

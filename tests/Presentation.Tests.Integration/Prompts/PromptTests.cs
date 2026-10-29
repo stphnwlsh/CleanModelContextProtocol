@@ -35,7 +35,7 @@ public class PromptTests : BaseToolTests
 
         // Act
         var result = await this.Client.GetPromptAsync("summarise_movie_reception",
-            new Dictionary<string, object> { ["movieTitle"] = movie.Title.ToUpperInvariant() });
+            new Dictionary<string, object?> { ["movieTitle"] = movie.Title.ToUpperInvariant() });
 
         // Assert
         result.Messages.Count.ShouldBe(2);
@@ -49,7 +49,7 @@ public class PromptTests : BaseToolTests
     {
         // Act
         var result = await this.Client.GetPromptAsync("summarise_movie_reception",
-            new Dictionary<string, object> { ["movieTitle"] = "No Such Movie" });
+            new Dictionary<string, object?> { ["movieTitle"] = "No Such Movie" });
 
         // Assert
         var message = result.Messages.ShouldHaveSingleItem();
@@ -61,7 +61,7 @@ public class PromptTests : BaseToolTests
     {
         // Act
         var exception = await Should.ThrowAsync<McpProtocolException>(() => this.Client.GetPromptAsync("summarise_movie_reception",
-            new Dictionary<string, object> { ["movieTitle"] = new string('a', 101) }).AsTask());
+            new Dictionary<string, object?> { ["movieTitle"] = new string('a', 101) }).AsTask());
 
         // Assert
         exception.ErrorCode.ShouldBe(McpErrorCode.InvalidParams);
@@ -72,10 +72,10 @@ public class PromptTests : BaseToolTests
     {
         // Arrange
         var movies = (await this.CallAsync<ResultPage<MovieResult>>("movies_search",
-            new Dictionary<string, object> { ["limit"] = 2 })).Items;
+            new Dictionary<string, object?> { ["limit"] = 2 })).Items;
 
         // Act
-        var result = await this.Client.GetPromptAsync("compare_movies", new Dictionary<string, object>
+        var result = await this.Client.GetPromptAsync("compare_movies", new Dictionary<string, object?>
         {
             ["firstMovieTitle"] = movies[0].Title,
             ["secondMovieTitle"] = movies[1].Title
@@ -91,7 +91,7 @@ public class PromptTests : BaseToolTests
     public async Task ReviewMovie_ShouldReturn_Instructions()
     {
         // Act
-        var result = await this.Client.GetPromptAsync("review_movie", new Dictionary<string, object>
+        var result = await this.Client.GetPromptAsync("review_movie", new Dictionary<string, object?>
         {
             ["movieTitle"] = "Some Movie",
             ["authorName"] = "Some Author"
@@ -106,7 +106,7 @@ public class PromptTests : BaseToolTests
 
     private async Task<MovieResult> FirstMovieAsync()
     {
-        return (await this.CallAsync<ResultPage<MovieResult>>("movies_search", new Dictionary<string, object> { ["limit"] = 50 }))
+        return (await this.CallAsync<ResultPage<MovieResult>>("movies_search", new Dictionary<string, object?> { ["limit"] = 50 }))
             .Items.First(m => m.ReviewCount > 0);
     }
 
@@ -118,6 +118,6 @@ public class PromptTests : BaseToolTests
 
         var embedded = resource.Text.Deserialize<MovieResult>();
         embedded.Id.ShouldBe(movie.Id);
-        embedded.Reviews.Count.ShouldBe(movie.ReviewCount);
+        embedded.Reviews.ShouldNotBeNull().Count.ShouldBe(movie.ReviewCount);
     }
 }

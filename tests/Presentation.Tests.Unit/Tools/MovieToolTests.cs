@@ -31,21 +31,22 @@ public class MovieToolTests
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Is<Queries.SearchMovies.SearchMoviesQuery>(q => q.Query == "lorem" && q.Limit == 5 && q.Cursor == "abc"))
-            .Returns(new Page<Entities.Movie>([SampleMovie()], 7, "next"));
+            .Send(Arg.Is<Queries.GetMovies.GetMoviesQuery>(q => q.Query == "lorem" && q.Offset == 5 && q.Limit == 1))
+            .Returns(new Page<Entities.MovieSummary>([new Entities.MovieSummary(MovieId, "Lorem Ipsum", 2, 3.5)], 5, 1, 7));
 
         // Act
-        var response = await MovieTools.SearchMovies(sender, "lorem", 5, "abc");
+        var response = await MovieTools.SearchMovies(sender, CancellationToken.None, "lorem", 5, 1);
 
         // Assert
         response.TotalCount.ShouldBe(7);
-        response.NextCursor.ShouldBe("next");
+        response.NextOffset.ShouldBe(6);
         response.Items.Count.ShouldBe(1);
         response.Items[0].Id.ShouldBe(MovieId);
         response.Items[0].Title.ShouldBe("Lorem Ipsum");
         response.Items[0].ReviewCount.ShouldBe(2);
         response.Items[0].AverageStars.ShouldBe(3.5);
         response.Items[0].Reviews.ShouldBeNull();
+        _ = await sender.DidNotReceive().Send(Arg.Any<Application.Reviews.Queries.GetReviewsForMovies.GetReviewsForMoviesQuery>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -55,19 +56,41 @@ public class MovieToolTests
         var sender = Substitute.For<ISender>();
 
         _ = sender
-            .Send(Arg.Any<Queries.SearchMovies.SearchMoviesQuery>())
-            .ReturnsForAnyArgs(new Page<Entities.Movie>([SampleMovie(), new Entities.Movie(Guid.Empty, "Empty")], 2));
+            .Send(Arg.Any<Queries.GetMovies.GetMoviesQuery>())
+            .ReturnsForAnyArgs(new Page<Entities.MovieSummary>(
+                [new Entities.MovieSummary(MovieId, "Lorem Ipsum", 2, 3.5), new Entities.MovieSummary(Guid.Empty, "Empty", 0, null)], 0, 10, 2));
+        _ = sender
+            .Send(Arg.Is<Application.Reviews.Queries.GetReviewsForMovies.GetReviewsForMoviesQuery>(q => q.MovieIds.SequenceEqual(new[] { MovieId, Guid.Empty })))
+            .Returns(new Dictionary<Guid, List<Review>> { [MovieId] = [.. SampleMovie().Reviews], [Guid.Empty] = [] });
 
         // Act
-        var response = await MovieTools.SearchMovies(sender, includeReviews: true);
+        var response = await MovieTools.SearchMovies(sender, CancellationToken.None, includeReviews: true);
 
         // Assert
-        response.Items[0].Reviews.Count.ShouldBe(2);
-        response.Items[0].Reviews[0].MovieTitle.ShouldBe("Lorem Ipsum");
-        response.Items[0].Reviews[0].AuthorName.ShouldBe("Dolor Sit");
+        response.Items[0].Reviews.ShouldNotBeNull().Count.ShouldBe(2);
+        response.Items[0].Reviews![0].MovieTitle.ShouldBe("Lorem Ipsum");
+        response.Items[0].Reviews![0].AuthorName.ShouldBe("Dolor Sit");
         response.Items[1].ReviewCount.ShouldBe(0);
         response.Items[1].AverageStars.ShouldBeNull();
         response.Items[1].Reviews.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task SearchMovies_ShouldSkip_Reviews_WhenPageIsEmpty()
+    {
+        // Arrange
+        var sender = Substitute.For<ISender>();
+
+        _ = sender
+            .Send(Arg.Any<Queries.GetMovies.GetMoviesQuery>())
+            .ReturnsForAnyArgs(new Page<Entities.MovieSummary>([], 0, 10, 0));
+
+        // Act
+        var response = await MovieTools.SearchMovies(sender, CancellationToken.None, "missing", includeReviews: true);
+
+        // Assert
+        response.Items.ShouldBeEmpty();
+        _ = await sender.DidNotReceive().Send(Arg.Any<Application.Reviews.Queries.GetReviewsForMovies.GetReviewsForMoviesQuery>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -81,14 +104,14 @@ public class MovieToolTests
             .Returns(SampleMovie());
 
         // Act
-        var response = await MovieTools.GetMovie(sender, MovieId);
+        var response = await MovieTools.GetMovie(sender, MovieId, CancellationToken.None);
 
         // Assert
         response.Id.ShouldBe(MovieId);
         response.AverageStars.ShouldBe(3.5);
-        response.Reviews.Count.ShouldBe(2);
-        response.Reviews[1].Stars.ShouldBe(2);
-        response.Reviews[1].MovieId.ShouldBe(MovieId);
-        response.Reviews[1].AuthorName.ShouldBe("Amet Elit");
+        response.Reviews.ShouldNotBeNull().Count.ShouldBe(2);
+        response.Reviews![1].Stars.ShouldBe(2);
+        response.Reviews![1].MovieId.ShouldBe(MovieId);
+        response.Reviews![1].AuthorName.ShouldBe("Amet Elit");
     }
 }

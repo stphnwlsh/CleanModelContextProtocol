@@ -36,8 +36,9 @@ public static class WebApplicationBuilderExtensions
         #region Project Dependencies
 
         _ = builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
-        _ = builder.Services.AddInfrastructure();
+        _ = builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("MovieReviews"));
         _ = builder.Services.AddApplication();
+        _ = builder.Services.AddHealthChecks().AddInfrastructureHealthChecks("ready");
 
         #endregion Project Dependencies
 
@@ -62,7 +63,7 @@ public static class WebApplicationBuilderExtensions
                 .AddMcp(options => options.ResourceMetadata = new()
                 {
                     Resource = authentication.Audience,
-                    AuthorizationServers = [authentication.Authority],
+                    AuthorizationServers = [authentication.Authority!],
                     ScopesSupported = authentication.Scopes,
                     ResourceName = "Clean Model Context Protocol"
                 });
@@ -97,8 +98,8 @@ public static class WebApplicationBuilderExtensions
                     A review links one author to one movie with a star rating from 1 (worst) to 5 (best).
                     Find things by name first: movies_search and authors_search return ids, review counts and average
                     stars, and reviews_list filters reviews by movie or author. Every search returns one page at a time,
-                    so pass nextCursor back to continue rather than raising the limit.
-                    reviews_write creates a review, or replaces one when you pass its reviewId.
+                    so pass nextOffset back as the offset to continue rather than raising the limit.
+                    reviews_write creates a review, or changes the stars of one when you pass its reviewId. A review's movie and author can't change.
                     reviews_delete can't be undone, so confirm with the user before calling it.
                     Each movie, author and review can also be read as a resource at movies://{id}, authors://{id} or
                     reviews://{id}, and server://version gives this server's version.

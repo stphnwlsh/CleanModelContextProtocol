@@ -5,6 +5,7 @@ using CleanModelContextProtocol.Presentation.Models;
 using Mediator;
 using ModelContextProtocol.Server;
 using Queries = Application.Authors.Queries;
+using Reviews = Application.Reviews.Queries;
 
 [McpServerToolType]
 public static class AuthorTools
@@ -15,18 +16,30 @@ public static class AuthorTools
         "every author a page at a time. Use this to find an author's id before calling reviews_list or reviews_write.")]
     public static async Task<ResultPage<AuthorResult>> SearchAuthors(
         ISender sender,
-        [Description("Part of the author's name, such as 'marie' or 'marie hirthe'. Leave empty to list every author.")] string query = null,
+        CancellationToken cancellationToken,
+        [Description("Part of the author's name, such as 'marie' or 'marie hirthe'. Leave empty to list every author.")] string? query = null,
+        [Description("The number of results to skip, 0 for the first page. Pass the nextOffset from a previous call to get the next page.")] int offset = 0,
         [Description("The most results to return, from 1 to 50.")] int limit = 10,
-        [Description("The nextCursor from a previous call, to get the next page. Leave empty for the first page.")] string cursor = null,
         [Description("Also return every review each author has written. Leave false unless you need the individual reviews.")] bool includeReviews = false)
     {
-        var page = await sender.Send(new Queries.SearchAuthors.SearchAuthorsQuery
+        var page = await sender.Send(new Queries.GetAuthors.GetAuthorsQuery
         {
             Query = query,
-            Limit = limit,
-            Cursor = cursor
-        });
+            Offset = offset,
+            Limit = limit
+        }, cancellationToken);
 
-        return page.ToResult(a => a.ToResult(includeReviews));
+        if (!includeReviews || page.Items.Count == 0)
+        {
+            return page.ToResult(a => a.ToResult());
+        }
+
+        // One query gets the reviews of the whole page.
+        var reviews = await sender.Send(new Reviews.GetReviewsForAuthors.GetReviewsForAuthorsQuery
+        {
+            AuthorIds = [.. page.Items.Select(a => a.Id)]
+        }, cancellationToken);
+
+        return page.ToResult(a => a.ToResult(reviews[a.Id]));
     }
 }

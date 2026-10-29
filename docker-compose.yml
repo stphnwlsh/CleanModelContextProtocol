@@ -10,6 +10,8 @@ services:
       - "8080:8080"
     environment:
       DOTNET_ENVIRONMENT: docker
+    volumes:
+      - movie-reviews-data:/app/data
     networks:
       - cleanmodelcontextprotocol_network
     depends_on:
@@ -24,7 +26,7 @@ services:
     depends_on:
       - api
   seq:
-    image: datalust/seq:latest
+    image: datalust/seq:2026.1.17473
     ports:
       - "5341:80"
     environment:
@@ -32,6 +34,8 @@ services:
       SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
     networks:
       - cleanmodelcontextprotocol_network
+volumes:
+  movie-reviews-data:
 networks:
   cleanmodelcontextprotocol_network:
     driver: bridge
