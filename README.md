@@ -16,6 +16,8 @@ A `dotnet new` template for a [Model Context Protocol](https://modelcontextproto
 
 It's one of five [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) templates that share the same Application and Infrastructure layers and differ only in how they present them. Same genes, different haircuts. See [Related templates](#related-templates).
 
+The template's home page is **[leanmeancleanapps.github.io/mcp](https://leanmeancleanapps.github.io/mcp/)**. Until its guides are written, this README is the full manual, so settle in.
+
 ## Contents
 
 - [Getting started](#getting-started)
