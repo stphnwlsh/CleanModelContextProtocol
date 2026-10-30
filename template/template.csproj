@@ -8,7 +8,7 @@
     <Authors>Stephen Walsh</Authors>
     <Description>A dotnet new template for a Model Context Protocol server using the MCP C# SDK, built with a streamlined Clean Architecture on .NET 10.</Description>
     <PackageTags>dotnet;csharp;dotnet-template;template;clean-architecture;cqrs;mediator;fluentvalidation;mapperly;entity-framework-core;docker;mcp;model-context-protocol;mcp-server</PackageTags>
-    <PackageProjectUrl>https://github.com/stphnwlsh/CleanModelContextProtocol</PackageProjectUrl>
+    <PackageProjectUrl>https://leanmeancleanapps.github.io/mcp/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/stphnwlsh/CleanModelContextProtocol</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>docs/LICENSE.md</PackageLicenseFile>
