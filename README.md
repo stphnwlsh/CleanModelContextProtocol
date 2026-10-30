@@ -2,7 +2,6 @@
 
 [![Build Pipeline](https://img.shields.io/github/actions/workflow/status/stphnwlsh/CleanModelContextProtocol/build-pipeline.yml?branch=main&label=Build%20Pipeline&logo=github&style=for-the-badge)](https://github.com/stphnwlsh/CleanModelContextProtocol/actions/workflows/build-pipeline.yml)
 [![Code Coverage](https://img.shields.io/codecov/c/github/stphnwlsh/CleanModelContextProtocol?label=Code%20Coverage&logo=codecov&logoColor=white&style=for-the-badge)](https://codecov.io/gh/stphnwlsh/CleanModelContextProtocol)
-[![OpenSSF Scorecard](https://img.shields.io/ossf-scorecard/github.com/stphnwlsh/CleanModelContextProtocol?label=OpenSSF%20Scorecard&style=for-the-badge)](https://scorecard.dev/viewer/?uri=github.com/stphnwlsh/CleanModelContextProtocol)
 [![NuGet](https://img.shields.io/nuget/v/CleanModelContextProtocol.Template?label=NuGet&logo=nuget&logoColor=white&style=for-the-badge)](https://www.nuget.org/packages/CleanModelContextProtocol.Template)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/CleanModelContextProtocol.Template?label=Downloads&logo=nuget&logoColor=white&style=for-the-badge)](https://www.nuget.org/packages/CleanModelContextProtocol.Template)
 [![License](https://img.shields.io/github/license/stphnwlsh/CleanModelContextProtocol?label=License&style=for-the-badge)](LICENSE.md)
