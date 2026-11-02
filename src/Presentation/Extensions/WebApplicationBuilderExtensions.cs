@@ -83,12 +83,12 @@ public static class WebApplicationBuilderExtensions
                     Title = "Clean Model Context Protocol",
                     Description = "Movies, the authors who review them, and their star ratings, served by a Clean Architecture .NET MCP server.",
                     Version = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty,
-                    WebsiteUrl = "https://github.com/stphnwlsh/CleanModelContextProtocol",
+                    WebsiteUrl = "https://github.com/LeanMeanCleanApps/CleanModelContextProtocol",
                     Icons =
                     [
                         new()
                         {
-                            Source = "https://raw.githubusercontent.com/stphnwlsh/CleanModelContextProtocol/main/icon.png",
+                            Source = "https://raw.githubusercontent.com/LeanMeanCleanApps/CleanModelContextProtocol/main/icon.png",
                             MimeType = "image/png"
                         }
                     ],
