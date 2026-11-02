@@ -38,6 +38,17 @@ public static class WebApplicationExtensions
 
         #endregion Logging
 
+        #region Authentication
+
+        if (AuthenticationSettings.FromConfiguration(app.Configuration).Enabled)
+        {
+            _ = app.UseAuthentication();
+        }
+
+        _ = app.UseAuthorization();
+
+        #endregion Authentication
+
         #region Health
 
         // Liveness runs no checks, so it only fails when the process can't answer. Readiness checks the database.
@@ -49,14 +60,7 @@ public static class WebApplicationExtensions
 
         #region Model Context Protocol
 
-        var mcp = app.MapMcp("/mcp");
-
-        if (AuthenticationSettings.FromConfiguration(app.Configuration).Enabled)
-        {
-            _ = app.UseAuthentication();
-            _ = app.UseAuthorization();
-            _ = mcp.RequireAuthorization();
-        }
+        _ = app.MapMcp("/mcp").RequireAuthorization();
 
         #endregion Model Context Protocol
 

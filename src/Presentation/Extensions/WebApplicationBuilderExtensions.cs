@@ -9,7 +9,9 @@ using CleanModelContextProtocol.Presentation.Errors;
 using CleanModelContextProtocol.Presentation.Serialization;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModelContextProtocol.AspNetCore.Authentication;
 using Serilog;
@@ -23,12 +25,12 @@ public static class WebApplicationBuilderExtensions
 
         #region Logging
 
-        _ = builder.Host.UseSerilog((hostContext, loggerConfiguration) => _ = loggerConfiguration.ReadFrom.Configuration(hostContext.Configuration)
+        _ = builder.Services.AddSerilog((services, loggerConfiguration) => _ = loggerConfiguration.ReadFrom.Configuration(services.GetRequiredService<IConfiguration>())
                 .Enrich.WithProperty(
-                    "Assembly Version",
+                    "AssemblyVersion",
                     assembly?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version)
                 .Enrich.WithProperty(
-                    "Assembly Informational Version",
+                    "AssemblyInformationalVersion",
                     assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion));
 
         #endregion Logging
@@ -68,6 +70,12 @@ public static class WebApplicationBuilderExtensions
                     ResourceName = "Clean Model Context Protocol"
                 });
             _ = builder.Services.AddAuthorization();
+        }
+        else
+        {
+            // The MCP endpoint always asks for authorization, so without an authority every request is let through.
+            _ = builder.Services.AddAuthorizationBuilder()
+                .SetDefaultPolicy(new AuthorizationPolicyBuilder().RequireAssertion(_ => true).Build());
         }
 
         #endregion Authentication

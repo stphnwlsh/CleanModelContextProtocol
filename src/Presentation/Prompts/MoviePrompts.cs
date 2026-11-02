@@ -1,6 +1,5 @@
 namespace CleanModelContextProtocol.Presentation.Prompts;
 
-using System.ComponentModel;
 using CleanModelContextProtocol.Presentation.Models;
 using CleanModelContextProtocol.Presentation.Serialization;
 using Mediator;
@@ -9,13 +8,14 @@ using ModelContextProtocol.Server;
 using Queries = Application.Movies.Queries;
 
 [McpServerPromptType]
-public static class MoviePrompts
+public static partial class MoviePrompts
 {
+    /// <summary>Summarise how reviewers have received a movie: its average stars, how the ratings spread, and who liked it most and least.</summary>
+    /// <param name="movieTitle">The movie's title, or part of it.</param>
     [McpServerPrompt(Name = "summarise_movie_reception", Title = "Summarise a movie's reception")]
-    [Description("Summarise how reviewers have received a movie: its average stars, how the ratings spread, and who liked it most and least.")]
-    public static async Task<GetPromptResult> SummariseMovieReception(
+    public static async partial Task<GetPromptResult> SummariseMovieReception(
         ISender sender,
-        [Description("The movie's title, or part of it.")] string movieTitle,
+        string movieTitle,
         CancellationToken cancellationToken)
     {
         var movie = await FindMovie(sender, movieTitle, cancellationToken);
@@ -41,12 +41,14 @@ public static class MoviePrompts
         };
     }
 
+    /// <summary>Compare how reviewers rated two movies, and say which one they preferred and by how much.</summary>
+    /// <param name="firstMovieTitle">The first movie's title, or part of it.</param>
+    /// <param name="secondMovieTitle">The second movie's title, or part of it.</param>
     [McpServerPrompt(Name = "compare_movies", Title = "Compare two movies")]
-    [Description("Compare how reviewers rated two movies, and say which one they preferred and by how much.")]
-    public static async Task<GetPromptResult> CompareMovies(
+    public static async partial Task<GetPromptResult> CompareMovies(
         ISender sender,
-        [Description("The first movie's title, or part of it.")] string firstMovieTitle,
-        [Description("The second movie's title, or part of it.")] string secondMovieTitle,
+        string firstMovieTitle,
+        string secondMovieTitle,
         CancellationToken cancellationToken)
     {
         var first = await FindMovie(sender, firstMovieTitle, cancellationToken);
@@ -71,11 +73,13 @@ public static class MoviePrompts
         };
     }
 
+    /// <summary>Write a review of a movie as one of the authors, checking the movie and author before saving it.</summary>
+    /// <param name="movieTitle">The movie's title, or part of it.</param>
+    /// <param name="authorName">The name of the author writing the review.</param>
     [McpServerPrompt(Name = "review_movie", Title = "Review a movie")]
-    [Description("Write a review of a movie as one of the authors, checking the movie and author before saving it.")]
-    public static GetPromptResult ReviewMovie(
-        [Description("The movie's title, or part of it.")] string movieTitle,
-        [Description("The name of the author writing the review.")] string authorName)
+    public static partial GetPromptResult ReviewMovie(
+        string movieTitle,
+        string authorName)
     {
         return new GetPromptResult
         {

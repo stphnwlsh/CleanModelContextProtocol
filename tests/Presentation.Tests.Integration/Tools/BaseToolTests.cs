@@ -8,12 +8,11 @@ using Xunit;
 
 public abstract class BaseToolTests : IAsyncLifetime, IAsyncDisposable
 {
-#pragma warning disable CS8618
-    private ModelContextProtocolApplication application;
+    // Both are created in InitializeAsync, which xUnit runs before every test.
+    private ModelContextProtocolApplication application = null!;
     private bool disposed;
 
-    protected McpClient Client { get; private set; }
-#pragma warning restore CS8618
+    protected McpClient Client { get; private set; } = null!;
 
     protected async Task<T> CallAsync<T>(string name, Dictionary<string, object?>? arguments = null)
     {
