@@ -41,7 +41,7 @@ Web templates log one line per request with `UseSerilogRequestLogging()`, under 
 ## Example
 
 ```csharp
-// src/Presentation/Extensions/WebApplicationBuilderExtensions.cs
+// src/Presentation/Extensions, where startup registers services
 _ = builder.Services.AddSerilog((services, loggerConfiguration) =>
 {
     var assembly = Assembly.GetEntryAssembly();
