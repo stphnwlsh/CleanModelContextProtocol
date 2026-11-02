@@ -14,7 +14,7 @@ xUnit for tests, Shouldly for assertions, NSubstitute for fakes. Test folders mi
 | Project | Tests |
 | --- | --- |
 | `tests/Application.Tests.Unit` | Handlers (repositories faked with NSubstitute) and validators (`FluentValidation.TestHelper`) |
-| `tests/Presentation.Tests.Unit` | Presentation classes called directly, with `ISender` faked |
+| `tests/Presentation.Tests.Unit` | Presentation classes called directly, with `ISender` faked. Only templates whose presentation layer has logic worth testing on its own have this project; the others test it through `presentation-integration-tests` |
 
 Names read as `Method_Should<Outcome>_<Condition>`: `Handle_ShouldThrowException_ReviewDoesNotExist`, `GetReviews_ShouldReturn_Ok`, `Validator_ShouldHaveValidationErrorFor_Id`.
 
@@ -79,5 +79,5 @@ _ = result.ShouldHaveValidationErrorFor(command => command.Id);
 
 ``` bash
 dotnet test tests/Application.Tests.Unit
-dotnet test tests/Presentation.Tests.Unit
+dotnet test tests/Presentation.Tests.Unit      # where the template has one
 ```
