@@ -5,11 +5,10 @@
 
 # Clean Model Context Protocol
 
-[![Build Pipeline](https://img.shields.io/github/actions/workflow/status/stphnwlsh/CleanModelContextProtocol/build-pipeline.yml?branch=main&label=Build%20Pipeline&logo=github&style=for-the-badge)](https://github.com/stphnwlsh/CleanModelContextProtocol/actions/workflows/build-pipeline.yml)
-[![Code Coverage](https://img.shields.io/codecov/c/github/stphnwlsh/CleanModelContextProtocol?label=Code%20Coverage&logo=codecov&logoColor=white&style=for-the-badge)](https://codecov.io/gh/stphnwlsh/CleanModelContextProtocol)
+[![Build Pipeline](https://img.shields.io/github/actions/workflow/status/LeanMeanCleanApps/CleanModelContextProtocol/build-pipeline.yml?branch=main&label=Build%20Pipeline&logo=github&style=for-the-badge)](https://github.com/LeanMeanCleanApps/CleanModelContextProtocol/actions/workflows/build-pipeline.yml)
 [![NuGet](https://img.shields.io/nuget/v/CleanModelContextProtocol.Template?label=NuGet&logo=nuget&logoColor=white&style=for-the-badge)](https://www.nuget.org/packages/CleanModelContextProtocol.Template)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/CleanModelContextProtocol.Template?label=Downloads&logo=nuget&logoColor=white&style=for-the-badge)](https://www.nuget.org/packages/CleanModelContextProtocol.Template)
-[![License](https://img.shields.io/github/license/stphnwlsh/CleanModelContextProtocol?label=License&style=for-the-badge)](LICENSE.md)
+[![License](https://img.shields.io/github/license/LeanMeanCleanApps/CleanModelContextProtocol?label=License&style=for-the-badge)](LICENSE.md)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/stphnwlsh?label=Sponsor&logo=githubsponsors&logoColor=white&color=ea4aaa&style=for-the-badge)](https://github.com/sponsors/stphnwlsh)
 
 A `dotnet new` template for a [Model Context Protocol](https://modelcontextprotocol.io) server built with a streamlined version of Clean Architecture and the [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk). All the layers you need, none of the ceremony you don't.
@@ -107,16 +106,16 @@ The one deliberate break from Clean Architecture is that the Presentation projec
 - Data stored in [SQLite](https://learn.microsoft.com/ef/core/providers/sqlite/) using [Entity Framework Core](https://learn.microsoft.com/ef/core) migrations, seeded with [Bogus](https://github.com/bchavez/Bogus) only when `Database:SeedSampleData` is on. Each test uses its own throwaway in-memory SQLite database, so tests never touch a real one or each other's data
 - Testing using [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet)
 - Build rules in `Directory.Build.props`: code style and the recommended analyzers are checked on every build, warnings fail it, and package versions live in one place with [Central Package Management](https://learn.microsoft.com/nuget/consume-packages/central-package-management)
-- CI with GitHub Actions: build and test, a `dotnet format` check, 95% coverage gate with at least 90% on the lines each pull request changes, [Trivy](https://trivy.dev) container scan, [CodeQL](https://codeql.github.com) static analysis, then a monthly NuGet release and GitHub release from `main` using [trusted publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing)
+- CI with GitHub Actions: build, a `dotnet format` check, tests with a 95% coverage bar, a check that the packed template still works, [CodeQL](https://codeql.github.com), a review of new dependencies and their licences, a smoke test of the image, and [Trivy](https://trivy.dev) scans of the container and Dockerfile. It sums the lot up in one comment on your pull request, so you know exactly who to blame, and it needs no accounts, tokens or secrets, so your copy works the moment you push it. Then a monthly NuGet release and GitHub release from `main` using [trusted publishing](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing), with an SPDX bill of materials attached
 - Health checks at `/health/live` and `/health/ready`, using [ASP.NET Core health checks](https://learn.microsoft.com/aspnet/core/host-and-deploy/health-checks)
 - Grouped dependency updates on the 15th of each month using [Dependabot](https://docs.github.com/code-security/dependabot), including the pinned Seq image
 - A Docker image that runs as a non-root user with a health check
 
 ## Releases
 
-The template is released once a month. On the 1st, at 9am US Central time, the pipeline checks for changes since the last release. If anything outside `.github/` has changed, it builds and tests `main`, publishes the new version to [NuGet](https://www.nuget.org/packages/CleanModelContextProtocol.Template) and creates a [GitHub release](https://github.com/stphnwlsh/CleanModelContextProtocol/releases) with notes for every pull request merged since the previous one. If nothing has changed, there's no release that month, because nobody needs a new version number for the same code. Dependency updates arrive on the 15th, so they're merged in time for the next release.
+The template is released once a month. On the 1st, just after 9am US Central time, the pipeline checks for changes since the last release. If anything outside `.github/` has changed, it builds and tests `main`, publishes the new version to [NuGet](https://www.nuget.org/packages/CleanModelContextProtocol.Template) and creates a [GitHub release](https://github.com/LeanMeanCleanApps/CleanModelContextProtocol/releases) with notes for every pull request merged since the previous one. If nothing has changed, there's no release that month, because nobody needs a new version number for the same code. Dependency updates arrive on the 15th, so they're merged in time for the next release.
 
-Versions keep the `YYYY.MM.DD.RUN` format. Up to the end of October 2026, every merge to `main` was released, so the older releases are much smaller. To release outside the monthly cycle, run the **Build Pipeline** workflow by hand. Tick **force** to release even when only `.github/` has changed.
+Versions keep the `YYYY.MM.DD.RUN` format. Up to the end of October 2026, every merge to `main` was released, so the older releases are much smaller. To release outside the monthly cycle, run the **Build Pipeline** workflow by hand from `main` and untick **dry-run**. Tick **force** to release even when only `.github/` has changed.
 
 To update an installed template to the latest release:
 
@@ -130,11 +129,11 @@ All five templates share the same Application and Infrastructure layers, tests, 
 
 | Template | Presentation | Package |
 | --- | --- | --- |
-| [Clean Minimal API](https://github.com/stphnwlsh/CleanMinimalApi) | ASP.NET Core Minimal APIs | [CleanMinimalApi.Template](https://www.nuget.org/packages/CleanMinimalApi.Template) |
+| [Clean Minimal API](https://github.com/LeanMeanCleanApps/CleanMinimalApi) | ASP.NET Core Minimal APIs | [CleanMinimalApi.Template](https://www.nuget.org/packages/CleanMinimalApi.Template) |
 | **Clean Model Context Protocol** (this repo) | Model Context Protocol server | [CleanModelContextProtocol.Template](https://www.nuget.org/packages/CleanModelContextProtocol.Template) |
-| [Clean GraphQL API](https://github.com/stphnwlsh/CleanGraphQLApi) | GraphQL with Hot Chocolate | [CleanGraphQLApi.Template](https://www.nuget.org/packages/CleanGraphQLApi.Template) |
-| [Clean Web API](https://github.com/stphnwlsh/CleanWebApi) | ASP.NET Core controllers | [CleanWebApi.Template](https://www.nuget.org/packages/CleanWebApi.Template) |
-| [Clean Lambda Function](https://github.com/stphnwlsh/CleanLamdaFunction) | AWS Lambda function | [CleanLambdaFunction.Template](https://www.nuget.org/packages/CleanLambdaFunction.Template) |
+| [Clean GraphQL API](https://github.com/LeanMeanCleanApps/CleanGraphQLApi) | GraphQL with Hot Chocolate | [CleanGraphQLApi.Template](https://www.nuget.org/packages/CleanGraphQLApi.Template) |
+| [Clean Web API](https://github.com/LeanMeanCleanApps/CleanWebApi) | ASP.NET Core controllers | [CleanWebApi.Template](https://www.nuget.org/packages/CleanWebApi.Template) |
+| [Clean Lambda Function](https://github.com/LeanMeanCleanApps/CleanLambdaFunction) | AWS Lambda function | [CleanLambdaFunction.Template](https://www.nuget.org/packages/CleanLambdaFunction.Template) |
 
 ## Resources
 
