@@ -17,7 +17,7 @@ services:
     depends_on:
       - seq
   inspector:
-    image: ghcr.io/modelcontextprotocol/inspector:2.12.0
+    image: ghcr.io/modelcontextprotocol/inspector:2.13.0
     command: ["--web", "--transport", "http", "--server-url", "http://api:8080/mcp"]
     ports:
       - "127.0.0.1:6274:6274"
