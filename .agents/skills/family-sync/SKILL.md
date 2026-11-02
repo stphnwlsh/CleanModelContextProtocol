@@ -9,7 +9,7 @@ metadata:
 
 ## The rule
 
-The five templates share everything except the Presentation layer. A shared change is made and reviewed in CleanModelContextProtocol first, then the same branch is opened in the other four with the same title, in this order: MCP, GraphQL, Web API, Lambda Function.
+The five templates share everything except the Presentation layer. A shared change is made and reviewed in CleanMinimalApi first, then the same branch is opened in the other four with the same title, in this order: MCP, GraphQL, Web API, Lambda Function.
 
 | Shared, copied as is (with the name swapped) | Per template |
 | --- | --- |
@@ -21,7 +21,7 @@ The five templates share everything except the Presentation layer. A shared chan
 
 | Template | Repository and namespace |
 | --- | --- |
-| Minimal API | `CleanModelContextProtocol` |
+| Minimal API | `CleanMinimalApi` |
 | MCP | `CleanModelContextProtocol` |
 | GraphQL | `CleanGraphQLApi` |
 | Web API | `CleanWebApi` |
@@ -29,16 +29,16 @@ The five templates share everything except the Presentation layer. A shared chan
 
 ## Steps
 
-1. Merge-ready in CleanModelContextProtocol first.
+1. Merge-ready in CleanMinimalApi first.
 2. For each other template, on the same branch name, copy the shared folders over and swap the name (no rsync needed):
 
    ``` bash
-   SRC=../CleanModelContextProtocol; NAME=CleanWebApi
+   SRC=../CleanMinimalApi; NAME=CleanWebApi
    for d in src/Application src/Infrastructure tests/Application.Tests.Unit tests/Infrastructure.Tests.Integration; do
      rm -rf "$d" && (cd "$SRC" && tar cf - "$d") | tar xf -
    done
-   grep -rl CleanModelContextProtocol src/Application src/Infrastructure tests/Application.Tests.Unit tests/Infrastructure.Tests.Integration \
-     | xargs sed -i "s/CleanModelContextProtocol/$NAME/g"
+   grep -rl CleanMinimalApi src/Application src/Infrastructure tests/Application.Tests.Unit tests/Infrastructure.Tests.Integration \
+     | xargs sed -i "s/CleanMinimalApi/$NAME/g"
    ```
 
 3. Copy the shared skills and the persona the same way, then edit the Presentation rows of `AGENTS.md` by hand. A new `repository` or `maintainer` skill also goes in the `RepositorySkills` list in `template/template.csproj`, so it stays out of the package.
@@ -49,7 +49,7 @@ The five templates share everything except the Presentation layer. A shared chan
 ## Don't
 
 - Change a shared file in one template only.
-- Merge the copies before the CleanModelContextProtocol pull request is approved.
+- Merge the copies before the CleanMinimalApi pull request is approved.
 - Copy `bin/` or `obj/` folders.
 
 ## Check
@@ -57,9 +57,9 @@ The five templates share everything except the Presentation layer. A shared chan
 Run in each copy, after the build:
 
 ``` bash
-SRC=../CleanModelContextProtocol; NAME=CleanWebApi; SHARED="src/Application src/Infrastructure tests/Application.Tests.Unit tests/Infrastructure.Tests.Integration"
+SRC=../CleanMinimalApi; NAME=CleanWebApi; SHARED="src/Application src/Infrastructure tests/Application.Tests.Unit tests/Infrastructure.Tests.Integration"
 tmp=$(mktemp -d); tar cf - --exclude=bin --exclude=obj $SHARED | (cd "$tmp" && tar xf -)
-grep -rl "$NAME" "$tmp" | xargs sed -i "s/$NAME/CleanModelContextProtocol/g"
+grep -rl "$NAME" "$tmp" | xargs sed -i "s/$NAME/CleanMinimalApi/g"
 for d in $SHARED; do diff -r --exclude=bin --exclude=obj "$SRC/$d" "$tmp/$d"; done   # expect no output
 dotnet build && dotnet test
 ```
