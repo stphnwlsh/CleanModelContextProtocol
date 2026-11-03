@@ -31,13 +31,17 @@ namespace CleanModelContextProtocol.Infrastructure.Databases.MovieReviews.Migrat
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LastName", "FirstName");
 
                     b.ToTable("Authors");
                 });
@@ -56,9 +60,12 @@ namespace CleanModelContextProtocol.Infrastructure.Databases.MovieReviews.Migrat
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .UseCollation("NOCASE");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Title");
 
                     b.ToTable("Movies");
                 });

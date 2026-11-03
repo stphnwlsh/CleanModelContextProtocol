@@ -1,7 +1,5 @@
 namespace CleanModelContextProtocol.Application.Tests.Unit.Reviews.Queries.GetReviewsForAuthors;
 
-using System.Threading;
-using System.Threading.Tasks;
 using Application.Authors.Entities;
 using Application.Reviews;
 using Application.Reviews.Entities;

@@ -37,7 +37,7 @@ public class ResourceTests : BaseToolTests
     public async Task ReadVersion_ShouldReturn_Version()
     {
         // Act
-        var version = await this.ReadAsync<Entities.Version>("server://version");
+        var version = await this.ReadAsync<Entities.VersionInfo>("server://version");
 
         // Assert
         version.FileVersion.ShouldNotBeNullOrWhiteSpace();

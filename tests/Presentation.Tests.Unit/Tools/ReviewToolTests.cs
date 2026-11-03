@@ -112,10 +112,6 @@ public class ReviewToolTests
 
         _ = sender
             .Send(Arg.Is<Commands.UpdateReview.UpdateReviewCommand>(c => c.Id == ReviewId && c.Stars == 2))
-            .Returns(true);
-
-        _ = sender
-            .Send(Arg.Is<Queries.GetReviewById.GetReviewByIdQuery>(q => q.Id == ReviewId))
             .Returns(SampleReview(2));
 
         // Act
@@ -125,6 +121,7 @@ public class ReviewToolTests
         response.Id.ShouldBe(ReviewId);
         response.Stars.ShouldBe(2);
         _ = await sender.DidNotReceive().Send(Arg.Any<Commands.CreateReview.CreateReviewCommand>());
+        _ = await sender.DidNotReceive().Send(Arg.Any<Queries.GetReviewById.GetReviewByIdQuery>());
     }
 
     [Fact]
@@ -135,7 +132,7 @@ public class ReviewToolTests
 
         _ = sender
             .Send(Arg.Is<Commands.DeleteReview.DeleteReviewCommand>(c => c.Id == ReviewId))
-            .Returns(true);
+            .Returns(Unit.Value);
 
         // Act
         var response = await ReviewTools.DeleteReview(sender, ReviewId, CancellationToken.None);
