@@ -1,6 +1,5 @@
 namespace CleanModelContextProtocol.Presentation.Resources;
 
-using System.ComponentModel;
 using CleanModelContextProtocol.Presentation.Models;
 using CleanModelContextProtocol.Presentation.Serialization;
 using Mediator;
@@ -8,13 +7,14 @@ using ModelContextProtocol.Server;
 using Queries = Application.Movies.Queries;
 
 [McpServerResourceType]
-public static class MovieResources
+public static partial class MovieResources
 {
+    /// <summary>A movie with its review count, average stars and every review, including each author's name.</summary>
+    /// <param name="movieId">The movie's id (a GUID).</param>
     [McpServerResource(UriTemplate = "movies://{movieId}", Name = "movie", Title = "Movie", MimeType = "application/json")]
-    [Description("A movie with its review count, average stars and every review, including each author's name.")]
-    public static async Task<string> GetMovie(
+    public static async partial Task<string> GetMovie(
         ISender sender,
-        [Description("The movie's id (a GUID).")] Guid movieId,
+        Guid movieId,
         CancellationToken cancellationToken)
     {
         var movie = await sender.Send(new Queries.GetMovieById.GetMovieByIdQuery

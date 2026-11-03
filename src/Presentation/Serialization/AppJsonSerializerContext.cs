@@ -1,15 +1,11 @@
 namespace CleanModelContextProtocol.Presentation.Serialization;
 
 using System.Text.Json.Serialization;
-using Application.Authors.Entities;
-using Application.Movies.Entities;
-using Application.Reviews.Entities;
 using Application.Versions.Entities;
 using CleanModelContextProtocol.Presentation.Models;
 
 /// <summary>
-/// JSON serialization context for compile-time source generation.
-/// Provides performance benefits and AOT (Ahead-of-Time) compilation support.
+/// Generated JSON code for every type the tools, resources and prompts return, so they're written without reflection.
 /// </summary>
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
@@ -17,16 +13,7 @@ using CleanModelContextProtocol.Presentation.Models;
     PropertyNameCaseInsensitive = true,
     WriteIndented = false,
     GenerationMode = JsonSourceGenerationMode.Default)]
-[JsonSerializable(typeof(Author))]
-[JsonSerializable(typeof(List<Author>))]
-[JsonSerializable(typeof(Movie))]
-[JsonSerializable(typeof(List<Movie>))]
-[JsonSerializable(typeof(Review))]
-[JsonSerializable(typeof(List<Review>))]
-[JsonSerializable(typeof(ReviewAuthor))]
-[JsonSerializable(typeof(ReviewedMovie))]
 [JsonSerializable(typeof(Version))]
-[JsonSerializable(typeof(List<Version>))]
 [JsonSerializable(typeof(DeletedReview))]
 [JsonSerializable(typeof(MovieResult))]
 [JsonSerializable(typeof(AuthorResult))]

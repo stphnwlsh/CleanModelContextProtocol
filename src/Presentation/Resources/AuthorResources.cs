@@ -1,6 +1,5 @@
 namespace CleanModelContextProtocol.Presentation.Resources;
 
-using System.ComponentModel;
 using CleanModelContextProtocol.Presentation.Models;
 using CleanModelContextProtocol.Presentation.Serialization;
 using Mediator;
@@ -8,13 +7,14 @@ using ModelContextProtocol.Server;
 using Queries = Application.Authors.Queries;
 
 [McpServerResourceType]
-public static class AuthorResources
+public static partial class AuthorResources
 {
+    /// <summary>An author with their review count, average stars and every review they have written, including each movie's title.</summary>
+    /// <param name="authorId">The author's id (a GUID).</param>
     [McpServerResource(UriTemplate = "authors://{authorId}", Name = "author", Title = "Author", MimeType = "application/json")]
-    [Description("An author with their review count, average stars and every review they have written, including each movie's title.")]
-    public static async Task<string> GetAuthor(
+    public static async partial Task<string> GetAuthor(
         ISender sender,
-        [Description("The author's id (a GUID).")] Guid authorId,
+        Guid authorId,
         CancellationToken cancellationToken)
     {
         var author = await sender.Send(new Queries.GetAuthorById.GetAuthorByIdQuery
