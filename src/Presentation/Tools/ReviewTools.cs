@@ -79,15 +79,10 @@ public static partial class ReviewTools
             return created.ToResult();
         }
 
-        _ = await sender.Send(new Commands.UpdateReview.UpdateReviewCommand
+        var updated = await sender.Send(new Commands.UpdateReview.UpdateReviewCommand
         {
             Id = reviewId.Value,
             Stars = stars
-        }, cancellationToken);
-
-        var updated = await sender.Send(new Queries.GetReviewById.GetReviewByIdQuery
-        {
-            Id = reviewId.Value
         }, cancellationToken);
 
         return updated.ToResult();
@@ -101,11 +96,12 @@ public static partial class ReviewTools
         Guid reviewId,
         CancellationToken cancellationToken)
     {
-        var deleted = await sender.Send(new Commands.DeleteReview.DeleteReviewCommand
+        // A review that isn't there throws not found, so getting here means it was deleted.
+        _ = await sender.Send(new Commands.DeleteReview.DeleteReviewCommand
         {
             Id = reviewId
         }, cancellationToken);
 
-        return new DeletedReview(reviewId, deleted);
+        return new DeletedReview(reviewId, true);
     }
 }

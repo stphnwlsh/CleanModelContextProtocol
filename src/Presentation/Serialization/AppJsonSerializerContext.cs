@@ -13,7 +13,7 @@ using CleanModelContextProtocol.Presentation.Models;
     PropertyNameCaseInsensitive = true,
     WriteIndented = false,
     GenerationMode = JsonSourceGenerationMode.Default)]
-[JsonSerializable(typeof(Version))]
+[JsonSerializable(typeof(VersionInfo))]
 [JsonSerializable(typeof(DeletedReview))]
 [JsonSerializable(typeof(MovieResult))]
 [JsonSerializable(typeof(AuthorResult))]
