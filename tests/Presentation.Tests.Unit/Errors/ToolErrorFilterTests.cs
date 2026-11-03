@@ -13,8 +13,15 @@ using NSubstitute;
 using Shouldly;
 using Xunit;
 
-public class ToolErrorFilterTests
+public sealed class ToolErrorFilterTests : IDisposable
 {
+    private readonly ServiceProvider services = new ServiceCollection().AddFakeLogging().BuildServiceProvider();
+
+    public void Dispose()
+    {
+        this.services.Dispose();
+    }
+
     [Fact]
     public async Task Filter_ShouldReturn_Result()
     {
@@ -48,7 +55,7 @@ public class ToolErrorFilterTests
     {
         // Arrange
         var exception = new InvalidOperationException("Broken");
-        var (request, collector) = CreateRequest();
+        var (request, collector) = this.CreateRequest();
         var handler = ToolErrorFilter.Filter((request, cancellationToken) => throw exception);
 
         // Act
@@ -70,7 +77,7 @@ public class ToolErrorFilterTests
     public async Task Filter_ShouldNotLog_ExpectedException()
     {
         // Arrange
-        var (request, collector) = CreateRequest();
+        var (request, collector) = this.CreateRequest();
         var handler = ToolErrorFilter.Filter((request, cancellationToken) => throw new NotFoundException("Expected Exception"));
 
         // Act
@@ -122,21 +129,16 @@ public class ToolErrorFilterTests
         result.Content.OfType<TextContentBlock>().Single().Text.ShouldBe("Error: An error occurred while processing your request.");
     }
 
-    private static (RequestContext<CallToolRequestParams> Request, FakeLogCollector Collector) CreateRequest()
+    private (RequestContext<CallToolRequestParams> Request, FakeLogCollector Collector) CreateRequest()
     {
-        var loggerProvider = new FakeLoggerProvider();
-        var services = new ServiceCollection()
-            .AddLogging(builder => builder.AddProvider(loggerProvider))
-            .BuildServiceProvider();
-
         var request = new RequestContext<CallToolRequestParams>(
             Substitute.For<McpServer>(),
             new JsonRpcRequest { Method = RequestMethods.ToolsCall },
             new CallToolRequestParams { Name = "movies_search" })
         {
-            Services = services
+            Services = this.services
         };
 
-        return (request, loggerProvider.Collector);
+        return (request, this.services.GetFakeLogCollector());
     }
 }
