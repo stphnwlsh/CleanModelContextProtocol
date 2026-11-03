@@ -29,6 +29,8 @@ Errors reach the model in two ways, both from `src/Presentation/Errors/`:
 | Tools | `ToolErrorFilter` | A normal result with `IsError = true` and a message the model can act on: `Validation Failed: ...` or `Not Found: ...`, ending with what to do next |
 | Resources and prompts | `ProtocolErrorFilter` | An `McpProtocolException`: `ResourceNotFound` for not found, `InvalidParams` for validation |
 
+Anything else is unexpected. `ToolErrorFilter` logs it as `Error` and returns `Error: An error occurred while processing your request.`, because the model only sees a tool error and nothing else would log it. `ProtocolErrorFilter` lets it through, and the MCP SDK logs it and sends an internal error (`serilog`).
+
 `ServerInstructions` in `WebApplicationBuilderExtensions` is the model's first read. It names the tools, how they connect and the rules (paging with `nextOffset`, confirm before deleting).
 
 ## Steps
