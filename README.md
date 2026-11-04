@@ -36,7 +36,7 @@ That's three layers, four test projects, a Dockerfile and a CI pipeline. Go and 
 ## Run it
 
 ```bash
-# Build the image and start it with sample data, plus the MCP Inspector and Seq
+# Build the image and start it with sample data, plus the MCP Inspector, a collector and the Aspire dashboard
 docker compose up -d --build
 
 # Ask the movies_search tool for a page of movies
@@ -80,7 +80,7 @@ Yes, the sample movies are named by a corporate buzzword generator, and the crit
 
 Curl is a fine way to prove it works and a terrible way to spend an afternoon. Open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) at <http://localhost:6274> instead. It's already pointed at the server, so flip the switch to connect and open **Tools**.
 
-There are six tools shaped around jobs rather than tables: `movies_search`, `movies_get`, `authors_search`, `reviews_list`, `reviews_write` and `reviews_delete`. Each has a description written for agents and hints that say what's read-only and what's destructive. Lists come back ten at a time, with a `totalCount` and a `nextOffset` when there's more to come, so an agent doesn't drown in its own context window. There are resources for every movie, author and review, and prompts for jobs like comparing two movies. The logs land in Seq at <http://localhost:5341>.
+There are six tools shaped around jobs rather than tables: `movies_search`, `movies_get`, `authors_search`, `reviews_list`, `reviews_write` and `reviews_delete`. Each has a description written for agents and hints that say what's read-only and what's destructive. Lists come back ten at a time, with a `totalCount` and a `nextOffset` when there's more to come, so an agent doesn't drown in its own context window. There are resources for every movie, author and review, and prompts for jobs like comparing two movies. Its logs, traces and metrics land in the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone) at <http://localhost:18888>.
 
 No Docker? `dotnet run --project src/Presentation` works too. Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).
 
@@ -100,7 +100,7 @@ And around the edges:
 
 - **Tests** use [xUnit](https://xunit.net), [Shouldly](https://github.com/shouldly/shouldly) and [NSubstitute](https://github.com/nsubstitute/NSubstitute), with coverage from [Coverlet](https://github.com/coverlet-coverage/coverlet). Each test gets its own throwaway in-memory database, so no test can spoil another one's data.
 - **Sample data** comes from [Bogus](https://github.com/bchavez/Bogus), and only when `Database:SeedSampleData` is on. A real deployment never starts with fake reviews.
-- **Logs** go through [Serilog](https://github.com/serilog/serilog), to the console and to [Seq](https://datalust.co/seq) when you run it with Docker Compose. Health checks answer at `/health/live` and `/health/ready`.
+- **Telemetry** is [OpenTelemetry](https://opentelemetry.io) all the way: a span for every request, tool call, use case and SQL command, metrics from ASP.NET Core, the MCP SDK, EF Core and each use case, and [Serilog](https://github.com/serilog/serilog) logs that know which trace they belong to. It all leaves over OTLP when `OTEL_EXPORTER_OTLP_ENDPOINT` is set, so point it at whatever backend you like. Docker Compose runs an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) that forwards it to the Aspire dashboard, the same shape you'd run in production. Health checks answer at `/health/live` and `/health/ready`.
 - **Build rules** live in `Directory.Build.props`. Code style and the recommended analyzers run on every build, warnings fail it, and package versions sit in one place with [Central Package Management](https://learn.microsoft.com/nuget/consume-packages/central-package-management).
 - **The container** runs as a non-root user and has its own health check.
 - **The pipeline** builds, checks formatting, tests with a 95% coverage bar, makes sure the packed template still works, runs [CodeQL](https://codeql.github.com), reviews new dependencies and their licences, starts the image to check it actually answers, and scans the container and Dockerfile with [Trivy](https://trivy.dev). Then it sums the lot up in one comment on your pull request, so you know exactly who to blame. It needs no accounts, tokens or secrets, so your copy works the moment you push it. Trust is earned.
