@@ -3,6 +3,7 @@ namespace CleanModelContextProtocol.Presentation.Extensions;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Application;
+using Application.Versions.Entities;
 using CleanModelContextProtocol.Presentation.Authentication;
 using CleanModelContextProtocol.Presentation.Completions;
 using CleanModelContextProtocol.Presentation.Errors;
@@ -40,6 +41,7 @@ public static class WebApplicationBuilderExtensions
         _ = builder.Services.AddMediator(options => options.ServiceLifetime = ServiceLifetime.Scoped);
         _ = builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("MovieReviews"));
         _ = builder.Services.AddApplication();
+        _ = builder.Services.AddSingleton(VersionInfo.FromAssembly(typeof(WebApplicationBuilderExtensions).Assembly));
         _ = builder.Services.AddHealthChecks().AddInfrastructureHealthChecks("ready");
 
         #endregion Project Dependencies

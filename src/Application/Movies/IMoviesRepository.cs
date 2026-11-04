@@ -1,13 +1,13 @@
 namespace CleanModelContextProtocol.Application.Movies;
 
+using Common.Paging;
 using Entities;
 
 public interface IMoviesRepository
 {
-    public Task<(List<MovieSummary> Items, int TotalCount)> GetMovies(
+    public Task<Page<MovieSummary>> GetMovies(
         string? query,
-        int offset,
-        int limit,
+        PageRequest page,
         CancellationToken cancellationToken);
 
     public Task<Movie?> GetMovieById(Guid id, CancellationToken cancellationToken);
