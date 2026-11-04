@@ -22,7 +22,7 @@ Three files in `.template.config` make up the template, and every symbol appears
 | File | Used by | Holds |
 | --- | --- | --- |
 | `template.json` | Every host | Identity, `tags.type` of `solution`, the standard classifications, `defaultName`, an SDK `constraints` entry matching `global.json`, `primaryOutputs` (the `.slnx`), the symbols with a `displayName` and a `description`, and the restore post action |
-| `dotnetcli.host.json` | `dotnet new` | Each symbol's `longName` and short flag, and the `usageExamples` in `--help` |
+| `dotnetcli.host.json` | `dotnet new` | Each symbol's `longName` and short flag, and `usageExamples` (kept for hosts that show them; the .NET 10 `--help` doesn't) |
 | `ide.host.json` | Visual Studio, Rider | The icon (`.template.config/icon.png`, a copy of the root `icon.png`) and the label, description and visibility of each symbol in the new project dialog |
 
 The words in those files are the first thing people read, in a terminal or a dialog. Write them in our voice (`docs-and-voice`): plain first, then one dry line if it earns its place. A few of them tip their hat to a certain long-running .NET podcast and its two hosts. Keep those where they are, and never explain the joke.
