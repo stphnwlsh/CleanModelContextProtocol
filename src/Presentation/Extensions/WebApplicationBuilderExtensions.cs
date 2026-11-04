@@ -10,7 +10,6 @@ using CleanModelContextProtocol.Presentation.Errors;
 using CleanModelContextProtocol.Presentation.Serialization;
 using CleanModelContextProtocol.Presentation.Telemetry;
 using Infrastructure;
-using Infrastructure.Telemetry;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -36,7 +35,7 @@ public static class WebApplicationBuilderExtensions
         var openTelemetry = builder.Services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddAttributes(telemetry.ResourceAttributes))
             .WithTracing(tracing => tracing
-                .AddSource(ApplicationTelemetry.Name, InfrastructureTelemetry.Name, "Experimental.ModelContextProtocol")
+                .AddSource(ApplicationTelemetry.Name, "Experimental.ModelContextProtocol")
                 .AddAspNetCoreInstrumentation(options =>
                 {
                     // Probes call the health endpoints every few seconds, so tracing them would bury everything else.
@@ -46,8 +45,7 @@ public static class WebApplicationBuilderExtensions
                 .AddHttpClientInstrumentation(options => options.RecordException = true))
             .WithMetrics(metrics => metrics
                 .AddMeter(
-                    ApplicationTelemetry.Name,
-                    InfrastructureTelemetry.EntityFrameworkCoreMeterName,
+                    "Microsoft.EntityFrameworkCore",
                     "Microsoft.AspNetCore.Authentication",
                     "Microsoft.AspNetCore.Authorization",
                     "Experimental.ModelContextProtocol")
