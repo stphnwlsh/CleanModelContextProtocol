@@ -10,12 +10,14 @@ services:
       - "8080:8080"
     environment:
       DOTNET_ENVIRONMENT: docker
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     volumes:
       - movie-reviews-data:/app/data
     networks:
       - cleanmodelcontextprotocol_network
     depends_on:
-      - seq
+      - otel-collector
   inspector:
     image: ghcr.io/modelcontextprotocol/inspector:2.13.0
     command: ["--web", "--transport", "http", "--server-url", "http://api:8080/mcp"]
@@ -25,13 +27,23 @@ services:
       - cleanmodelcontextprotocol_network
     depends_on:
       - api
-  seq:
-    image: datalust/seq:2026.1.17473
+  otel-collector:
+    image: otel/opentelemetry-collector:0.164.0
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
     ports:
-      - "5341:80"
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - cleanmodelcontextprotocol_network
+    depends_on:
+      - aspire-dashboard
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6.2
+    ports:
+      - "18888:18888"
     environment:
-      ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+      ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
     networks:
       - cleanmodelcontextprotocol_network
 volumes:
