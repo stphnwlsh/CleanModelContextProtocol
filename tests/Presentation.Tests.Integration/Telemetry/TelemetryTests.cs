@@ -67,7 +67,7 @@ public sealed class TelemetryTests : IDisposable
         // Assert
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-        var trace = this.SpansIn(traceId);
+        var trace = await this.ServerTraceIn(traceId);
         var server = trace.Single(s => s.Source.Name == AspNetCoreSourceName);
         var tool = trace.Single(s => s.Source.Name == McpSourceName);
         var useCase = trace.Single(s => s.Source.Name == ApplicationTelemetry.Name);
@@ -124,6 +124,17 @@ public sealed class TelemetryTests : IDisposable
     public void Dispose()
     {
         this.listener.Dispose();
+    }
+
+    private async Task<List<Activity>> ServerTraceIn(ActivityTraceId traceId)
+    {
+        // The test server can hand back the response a moment before its request span stops, so wait for that span.
+        for (var attempt = 0; attempt < 50 && !this.SpansIn(traceId).Exists(s => s.Source.Name == AspNetCoreSourceName); attempt++)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
+        }
+
+        return this.SpansIn(traceId);
     }
 
     private List<Activity> SpansIn(ActivityTraceId traceId)
