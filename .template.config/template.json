@@ -20,7 +20,7 @@
     "type": "solution"
   },
   "sourceName": "CleanModelContextProtocol",
-  "defaultName": "Acme.Movies",
+  "defaultName": "WorksOnMyMachine.Movies",
   "preferNameDirectory": true,
   "constraints": {
     "sdk": {
