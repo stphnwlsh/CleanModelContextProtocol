@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <PackageType>Template</PackageType>
     <PackageId>CleanModelContextProtocol.Template</PackageId>
-    <Title>Clean Model Context Protocol Template</Title>
+    <Title>Clean Model Context Protocol (MCP) Template</Title>
     <Authors>Stephen Walsh</Authors>
     <Description>A dotnet new template for a Model Context Protocol server using the MCP C# SDK, built with a streamlined Clean Architecture on .NET 10.</Description>
     <PackageTags>dotnet;csharp;dotnet-template;template;clean-architecture;cqrs;mediator;fluentvalidation;mapperly;entity-framework-core;docker;mcp;model-context-protocol;mcp-server</PackageTags>

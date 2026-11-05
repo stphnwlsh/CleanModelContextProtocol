@@ -24,6 +24,8 @@ dotnet new cleanmodelcontextprotocol --name WorksOnMyMachine.Movies --authorName
 cd WorksOnMyMachine.Movies
 ```
 
+`cleanmcp` works too, for anyone who'd rather not type `cleanmodelcontextprotocol` every time.
+
 | Option | Default | What it does |
 | --- | --- | --- |
 | `--name`, `-n` | The folder's name | Names the solution and its root namespace |
@@ -33,7 +35,7 @@ cd WorksOnMyMachine.Movies
 | `--audience`, `-aud` | Empty | The audience tokens must be issued for, usually the server's own URL. Only used with `--include-auth` |
 | `--no-restore` | Off | Skips the package restore that normally runs once the solution is created |
 
-Rather click than type? Visual Studio and Rider show the same options in their new project dialogs, and `dotnet new cleanmodelcontextprotocol --help` lists them in the terminal.
+Rather click than type? Visual Studio and Rider show the same options in their new project dialogs. They always show the authority and audience fields, but only use them when **Include authentication** is ticked. In the terminal, `dotnet new cleanmodelcontextprotocol --help` lists them all.
 
 That's three layers, four test projects, a Dockerfile and a CI pipeline. Go and tell your team you've been working on it all week.
 

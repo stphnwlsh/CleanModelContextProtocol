@@ -4,6 +4,14 @@ A `dotnet new` template for a [Model Context Protocol](https://modelcontextproto
 
 It's one of five [Lean Mean Clean Apps](https://leanmeancleanapps.github.io/) templates, for Minimal APIs, Model Context Protocol, GraphQL, Web API controllers and AWS Lambda. They share the same Application and Infrastructure layers and differ only in how they face the world. The full docs live at [leanmeancleanapps.github.io/mcp](https://leanmeancleanapps.github.io/mcp/).
 
+| Template | Presentation | Package | Docs |
+| --- | --- | --- | --- |
+| Clean Minimal API | ASP.NET Core Minimal APIs | [CleanMinimalApi.Template](https://www.nuget.org/packages/CleanMinimalApi.Template) | [Docs](https://leanmeancleanapps.github.io/minimalapi/) |
+| **Clean Model Context Protocol** | Model Context Protocol server, you are here | [CleanModelContextProtocol.Template](https://www.nuget.org/packages/CleanModelContextProtocol.Template) | [Docs](https://leanmeancleanapps.github.io/mcp/) |
+| Clean GraphQL API | GraphQL with Hot Chocolate | [CleanGraphQLApi.Template](https://www.nuget.org/packages/CleanGraphQLApi.Template) | [Docs](https://leanmeancleanapps.github.io/graphql/) |
+| Clean Web API | ASP.NET Core controllers | [CleanWebApi.Template](https://www.nuget.org/packages/CleanWebApi.Template) | [Docs](https://leanmeancleanapps.github.io/webapi/) |
+| Clean Lambda Function | AWS Lambda | [CleanLambdaFunction.Template](https://www.nuget.org/packages/CleanLambdaFunction.Template) | [Docs](https://leanmeancleanapps.github.io/lambda/) |
+
 ## Get started
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). [Docker](https://www.docker.com/products/docker-desktop) is optional, but it's the quickest way to see it running.
@@ -17,6 +25,8 @@ dotnet new cleanmodelcontextprotocol --name WorksOnMyMachine.Movies --authorName
 cd WorksOnMyMachine.Movies
 ```
 
+`cleanmcp` works too, for anyone who'd rather not type `cleanmodelcontextprotocol` every time.
+
 | Option | Default | What it does |
 | --- | --- | --- |
 | `--name`, `-n` | The folder's name | Names the solution and its root namespace |
@@ -26,7 +36,7 @@ cd WorksOnMyMachine.Movies
 | `--audience`, `-aud` | Empty | The audience tokens must be issued for, usually the server's own URL. Only used with `--include-auth` |
 | `--no-restore` | Off | Skips the package restore that normally runs once the solution is created |
 
-Rather click than type? Visual Studio and Rider show the same options in their new project dialogs, and `dotnet new cleanmodelcontextprotocol --help` lists them in the terminal.
+Rather click than type? Visual Studio and Rider show the same options in their new project dialogs. They always show the authority and audience fields, but only use them when **Include authentication** is ticked. In the terminal, `dotnet new cleanmodelcontextprotocol --help` lists them all.
 
 ## Run it
 
