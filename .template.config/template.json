@@ -64,7 +64,7 @@
       "type": "parameter",
       "datatype": "bool",
       "displayName": "Include authentication",
-      "description": "Add OAuth for MCP clients. Leave it off and the server has no auth code at all, which is fine on your machine and brave anywhere else. Default: off.",
+      "description": "Add OAuth for MCP clients. Leave it off and the server has no auth code at all, which is fine on your machine and brave anywhere else.",
       "defaultValue": "false"
     },
     "authority": {

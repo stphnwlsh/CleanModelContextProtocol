@@ -27,7 +27,7 @@ Results are read with `Deserialize<T>()`, which uses the server's own `McpSerial
 3. For each tool, test the success paths and each error result, asserting the message the model will read (`test-design`).
 4. For resources and prompts, assert the `McpProtocolException.ErrorCode` (`ResourceNotFound`, `InvalidParams`) and its message.
 5. A tool's name, title and annotations are checked in `ToolListTests`; add a row for a new tool.
-6. Tests that need authentication create their own `ModelContextProtocolApplication` with `Authentication:*` settings and a test signing key, and use a plain `HttpClient` or a client with a bearer token. See `Authentication/AuthenticationTests.cs`.
+6. In a solution with authentication, tests that need it create their own `ModelContextProtocolApplication` with `Authentication:*` settings and a test signing key, and use a plain `HttpClient` or a client with a bearer token. See `Authentication/AuthenticationTests.cs`.
 
 ## Example
 
