@@ -12,9 +12,12 @@
   "groupIdentity": "CleanModelContextProtocol",
   "generatorVersions": "[1.0.0.0-*)",
   "precedence": "100",
-  "name": "Clean Model Context Protocol Template",
+  "name": "Clean Model Context Protocol (MCP) Template",
   "description": "A Model Context Protocol server on the MCP C# SDK and .NET 10, built with Clean Architecture minus the ceremony.",
-  "shortName": "cleanmodelcontextprotocol",
+  "shortName": [
+    "cleanmodelcontextprotocol",
+    "cleanmcp"
+  ],
   "tags": {
     "language": "C#",
     "type": "solution"
