@@ -1,7 +1,6 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Errors;
 
-using CleanModelContextProtocol.Application.Common.Exceptions;
-using CleanModelContextProtocol.Presentation.Errors;
+using Application.Common.Exceptions;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +9,7 @@ using Microsoft.Extensions.Logging.Testing;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using NSubstitute;
+using Presentation.Errors;
 using Shouldly;
 using Xunit;
 

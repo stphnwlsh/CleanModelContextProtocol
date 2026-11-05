@@ -1,8 +1,8 @@
 namespace CleanModelContextProtocol.Presentation.Tools;
 
-using CleanModelContextProtocol.Presentation.Models;
 using Mediator;
 using ModelContextProtocol.Server;
+using Presentation.Models;
 using Commands = Application.Reviews.Commands;
 using Queries = Application.Reviews.Queries;
 

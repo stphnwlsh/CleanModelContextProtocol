@@ -1,10 +1,10 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Models;
 
-using CleanModelContextProtocol.Application.Authors.Entities;
-using CleanModelContextProtocol.Application.Common.Paging;
-using CleanModelContextProtocol.Application.Movies.Entities;
-using CleanModelContextProtocol.Application.Reviews.Entities;
-using CleanModelContextProtocol.Presentation.Models;
+using Application.Authors.Entities;
+using Application.Common.Paging;
+using Application.Movies.Entities;
+using Application.Reviews.Entities;
+using Presentation.Models;
 using Shouldly;
 using Xunit;
 
