@@ -6,17 +6,23 @@ using Application;
 using Application.Common.Telemetry;
 using Application.Versions.Entities;
 using Infrastructure;
+#if includeAuth
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+#endif
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+#if includeAuth
 using ModelContextProtocol.AspNetCore.Authentication;
+#endif
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+#if includeAuth
 using Presentation.Authentication;
+#endif
 using Presentation.Completions;
 using Presentation.Errors;
 using Presentation.Serialization;
@@ -45,11 +51,15 @@ public static class WebApplicationBuilderExtensions
                 })
                 .AddHttpClientInstrumentation(options => options.RecordException = true))
             .WithMetrics(metrics => metrics
+#if includeAuth
                 .AddMeter(
                     "Microsoft.EntityFrameworkCore",
                     "Microsoft.AspNetCore.Authentication",
                     "Microsoft.AspNetCore.Authorization",
                     "Experimental.ModelContextProtocol")
+#else
+                .AddMeter("Microsoft.EntityFrameworkCore", "Experimental.ModelContextProtocol")
+#endif
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddRuntimeInstrumentation()
@@ -102,6 +112,7 @@ public static class WebApplicationBuilderExtensions
 
         #endregion Project Dependencies
 
+#if includeAuth
         #region Authentication
 
         var authentication = AuthenticationSettings.FromConfiguration(builder.Configuration);
@@ -138,6 +149,7 @@ public static class WebApplicationBuilderExtensions
 
         #endregion Authentication
 
+#endif
         #region Model Context Protocol
 
         _ = builder.Services
@@ -149,12 +161,14 @@ public static class WebApplicationBuilderExtensions
                     Title = "Clean Model Context Protocol",
                     Description = "Movies, the authors who review them, and their star ratings, served by a Clean Architecture .NET MCP server.",
                     Version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? string.Empty,
-                    WebsiteUrl = "https://github.com/LeanMeanCleanApps/CleanModelContextProtocol",
+                    // The docs site and a pinned brand release, not this repository: dotnet new renames the
+                    // template's name wherever it appears, so repository links break in a new solution.
+                    WebsiteUrl = "https://leanmeancleanapps.github.io/mcp/",
                     Icons =
                     [
                         new()
                         {
-                            Source = "https://raw.githubusercontent.com/LeanMeanCleanApps/CleanModelContextProtocol/main/icon.png",
+                            Source = "https://raw.githubusercontent.com/LeanMeanCleanApps/brand/2026.11.04/assets/logos/mcp/png/mcp-square-128.png",
                             MimeType = "image/png"
                         }
                     ],

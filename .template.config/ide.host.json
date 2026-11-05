@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json.schemastore.org/ide.host",
+  "icon": "icon.png",
+  "tags": [
+    {
+      "type": "platform",
+      "add": [
+        "Linux",
+        "macOS",
+        "Windows"
+      ]
+    },
+    {
+      "type": "projectType",
+      "add": [
+        "Service",
+        "AI"
+      ]
+    }
+  ],
+  "symbolInfo": [
+    {
+      "id": "authorName",
+      "name": {
+        "text": "Author name"
+      },
+      "description": {
+        "text": "Your name, for the Authors and Copyright lines."
+      },
+      "isVisible": true,
+      "persistenceScope": "shared",
+      "persistenceScopeName": "LeanMeanCleanApps"
+    },
+    {
+      "id": "includeAuth",
+      "name": {
+        "text": "Include authentication"
+      },
+      "description": {
+        "text": "Add OAuth for MCP clients. Leave it unticked for a server with no auth code at all. Default: off."
+      },
+      "isVisible": true
+    },
+    {
+      "id": "authority",
+      "name": {
+        "text": "Token authority"
+      },
+      "description": {
+        "text": "The OAuth server that issues access tokens. Needed when authentication is on."
+      },
+      "isVisible": true
+    },
+    {
+      "id": "audience",
+      "name": {
+        "text": "Token audience (optional)"
+      },
+      "description": {
+        "text": "Who the tokens are for, usually the server's own URL."
+      },
+      "isVisible": true
+    }
+  ]
+}

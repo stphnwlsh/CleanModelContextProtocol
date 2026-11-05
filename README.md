@@ -20,16 +20,20 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). [
 dotnet new install CleanModelContextProtocol.Template
 
 # Create a solution
-dotnet new cleanmodelcontextprotocol --name Acme.Reviews --authorName "Your Name"
-cd Acme.Reviews
+dotnet new cleanmodelcontextprotocol --name WorksOnMyMachine.Movies --authorName "Your Name"
+cd WorksOnMyMachine.Movies
 ```
 
-| Option | What it does |
-| --- | --- |
-| `--name` | Names the solution and its root namespace |
-| `--authorName` | Puts your name on the assembly instead of ours |
-| `--authority` | Your OAuth authorization server. Leave it out and the server runs without authentication |
-| `--audience` | The audience tokens must be issued for, usually the server's own URL |
+| Option | Default | What it does |
+| --- | --- | --- |
+| `--name`, `-n` | The folder's name | Names the solution and its root namespace |
+| `--authorName`, `-an` | `Stephen Walsh` | Puts your name on the assembly instead of ours |
+| `--include-auth` | Off | Adds OAuth for MCP clients. Leave it out and the server has no auth code at all |
+| `--authority`, `-iss` | Empty | Your OAuth authorization server. Required with `--include-auth` |
+| `--audience`, `-aud` | Empty | The audience tokens must be issued for, usually the server's own URL. Only used with `--include-auth` |
+| `--no-restore` | Off | Skips the package restore that normally runs once the solution is created |
+
+Rather click than type? Visual Studio and Rider show the same options in their new project dialogs, and `dotnet new cleanmodelcontextprotocol --help` lists them in the terminal.
 
 That's three layers, four test projects, a Dockerfile and a CI pipeline. Go and tell your team you've been working on it all week.
 
@@ -84,7 +88,7 @@ There are six tools shaped around jobs rather than tables: `movies_search`, `mov
 
 No Docker? `dotnet run --project src/Presentation` works too. Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).
 
-The server is open until you give it an authorization server. Pass `--authority` and `--audience` when you create the solution, or set `Authentication:Authority` later. `/mcp` then asks for a bearer token, and the server publishes [protected resource metadata](https://modelcontextprotocol.io/specification/latest/basic/authorization) so MCP clients can find your authorization server and sign in by themselves. [Securing the server](https://leanmeancleanapps.github.io/mcp/guides/secure-the-server/) has the details.
+The server is open unless you ask for authentication. Create the solution with `--include-auth --authority https://login.example.com --audience https://mcp.example.com` and `/mcp` asks for a bearer token, and the server publishes [protected resource metadata](https://modelcontextprotocol.io/specification/latest/basic/authorization) so MCP clients can find your authorization server and sign in by themselves. Leave `--include-auth` out and there's no authentication code in the solution at all, so there's nothing to leave switched off by accident. [Securing the server](https://leanmeancleanapps.github.io/mcp/guides/secure-the-server/) has the details, including how to add it later.
 
 ## What's inside
 
