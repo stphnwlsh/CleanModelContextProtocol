@@ -7,12 +7,16 @@ using Xunit;
 
 public class HealthEndpointTests : IDisposable
 {
+#if auth
     private readonly ModelContextProtocolApplication application = new(settings: new Dictionary<string, string?>
     {
         // Health checks have to answer without a token, so they're tested with authentication on.
         ["Authentication:Authority"] = "https://login.example.com",
         ["Authentication:Audience"] = "https://mcp.example.com"
     });
+#else
+    private readonly ModelContextProtocolApplication application = new();
+#endif
 
     [Theory]
     [InlineData("/health/live")]

@@ -5,18 +5,24 @@ using System.Reflection;
 using Application;
 using Application.Common.Telemetry;
 using Application.Versions.Entities;
+#if auth
 using CleanModelContextProtocol.Presentation.Authentication;
+#endif
 using CleanModelContextProtocol.Presentation.Completions;
 using CleanModelContextProtocol.Presentation.Errors;
 using CleanModelContextProtocol.Presentation.Serialization;
 using CleanModelContextProtocol.Presentation.Telemetry;
 using Infrastructure;
+#if auth
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+#endif
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+#if auth
 using ModelContextProtocol.AspNetCore.Authentication;
+#endif
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -45,11 +51,15 @@ public static class WebApplicationBuilderExtensions
                 })
                 .AddHttpClientInstrumentation(options => options.RecordException = true))
             .WithMetrics(metrics => metrics
+#if auth
                 .AddMeter(
                     "Microsoft.EntityFrameworkCore",
                     "Microsoft.AspNetCore.Authentication",
                     "Microsoft.AspNetCore.Authorization",
                     "Experimental.ModelContextProtocol")
+#else
+                .AddMeter("Microsoft.EntityFrameworkCore", "Experimental.ModelContextProtocol")
+#endif
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddRuntimeInstrumentation()
@@ -102,6 +112,7 @@ public static class WebApplicationBuilderExtensions
 
         #endregion Project Dependencies
 
+#if auth
         #region Authentication
 
         var authentication = AuthenticationSettings.FromConfiguration(builder.Configuration);
@@ -138,6 +149,7 @@ public static class WebApplicationBuilderExtensions
 
         #endregion Authentication
 
+#endif
         #region Model Context Protocol
 
         _ = builder.Services
