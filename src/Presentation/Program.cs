@@ -1,5 +1,5 @@
 using CleanModelContextProtocol.Presentation.Extensions;
-using Serilog;
+using Log = Serilog.Log;
 
 var builder = WebApplication
     .CreateBuilder(args)

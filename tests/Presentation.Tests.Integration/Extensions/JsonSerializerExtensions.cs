@@ -1,7 +1,7 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Integration.Extensions;
 
 using System.Text.Json;
-using CleanModelContextProtocol.Presentation.Serialization;
+using Presentation.Serialization;
 
 public static class JsonSerializerExtensions
 {

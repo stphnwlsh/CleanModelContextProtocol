@@ -1,8 +1,8 @@
 namespace CleanModelContextProtocol.Application.Tests.Unit.Common.Exceptions;
 
 using Application.Authors.Entities;
-using CleanModelContextProtocol.Application.Common.Enums;
-using CleanModelContextProtocol.Application.Common.Exceptions;
+using Application.Common.Enums;
+using Application.Common.Exceptions;
 using Shouldly;
 using Xunit;
 

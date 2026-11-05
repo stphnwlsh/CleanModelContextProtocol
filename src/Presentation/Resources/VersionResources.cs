@@ -1,8 +1,8 @@
 namespace CleanModelContextProtocol.Presentation.Resources;
 
-using CleanModelContextProtocol.Presentation.Serialization;
 using Mediator;
 using ModelContextProtocol.Server;
+using Presentation.Serialization;
 using Queries = Application.Versions.Queries;
 
 [McpServerResourceType]

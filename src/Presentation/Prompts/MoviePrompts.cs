@@ -1,10 +1,10 @@
 namespace CleanModelContextProtocol.Presentation.Prompts;
 
-using CleanModelContextProtocol.Presentation.Models;
-using CleanModelContextProtocol.Presentation.Serialization;
 using Mediator;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
+using Presentation.Models;
+using Presentation.Serialization;
 using Queries = Application.Movies.Queries;
 
 [McpServerPromptType]
