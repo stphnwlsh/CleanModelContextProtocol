@@ -28,8 +28,7 @@ cd WorksOnMyMachine.Movies
 | --- | --- |
 | `--name`, `-n` | Names the solution and its root namespace |
 | `--authorName`, `-an` | Puts your name on the assembly instead of ours |
-| `--auth` | `none` (the default) leaves the server open, `oauth` switches on OAuth |
-| `--authority`, `-iss` | Your OAuth authorization server, required with `--auth oauth` |
+| `--authority`, `-iss` | Your OAuth authorization server. Leave it out and the server runs without authentication |
 | `--audience`, `-aud` | The audience tokens must be issued for, usually the server's own URL |
 | `--no-restore` | Skips the package restore that normally runs once the solution is created |
 
@@ -88,7 +87,7 @@ There are six tools shaped around jobs rather than tables: `movies_search`, `mov
 
 No Docker? `dotnet run --project src/Presentation` works too. Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).
 
-The server is open until you give it an authorization server. Pass `--auth oauth` with `--authority` and `--audience` when you create the solution, or set `Authentication:Authority` later. `/mcp` then asks for a bearer token, and the server publishes [protected resource metadata](https://modelcontextprotocol.io/specification/latest/basic/authorization) so MCP clients can find your authorization server and sign in by themselves. [Securing the server](https://leanmeancleanapps.github.io/mcp/guides/secure-the-server/) has the details.
+The server is open until you give it an authorization server. Pass `--authority` and `--audience` when you create the solution, or set `Authentication:Authority` later. `/mcp` then asks for a bearer token, and the server publishes [protected resource metadata](https://modelcontextprotocol.io/specification/latest/basic/authorization) so MCP clients can find your authorization server and sign in by themselves. [Securing the server](https://leanmeancleanapps.github.io/mcp/guides/secure-the-server/) has the details.
 
 ## What's inside
 

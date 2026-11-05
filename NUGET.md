@@ -21,8 +21,7 @@ cd WorksOnMyMachine.Movies
 | --- | --- |
 | `--name`, `-n` | Names the solution and its root namespace |
 | `--authorName`, `-an` | Puts your name on the assembly instead of ours |
-| `--auth` | `none` (the default) leaves the server open, `oauth` switches on OAuth |
-| `--authority`, `-iss` | Your OAuth authorization server, required with `--auth oauth` |
+| `--authority`, `-iss` | Your OAuth authorization server. Leave it out and the server runs without authentication |
 | `--audience`, `-aud` | The audience tokens must be issued for, usually the server's own URL |
 | `--no-restore` | Skips the package restore that normally runs once the solution is created |
 
@@ -40,7 +39,7 @@ dotnet test
 
 Then open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) at <http://localhost:6274>. It's already pointed at the server at <http://localhost:8080/mcp>, so flip the switch to connect and open **Tools**.
 
-The server is open until you pass `--auth oauth` with `--authority` and `--audience`, and then `/mcp` asks for a bearer token and publishes protected resource metadata so clients can sign in.
+The server is open until you pass `--authority` and `--audience`, and then `/mcp` asks for a bearer token and publishes protected resource metadata so clients can sign in.
 
 ## What's inside
 
