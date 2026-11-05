@@ -1,11 +1,11 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Errors;
 
-using CleanModelContextProtocol.Application.Common.Exceptions;
-using CleanModelContextProtocol.Presentation.Errors;
+using Application.Common.Exceptions;
 using FluentValidation;
 using FluentValidation.Results;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
+using Presentation.Errors;
 using Shouldly;
 using Xunit;
 

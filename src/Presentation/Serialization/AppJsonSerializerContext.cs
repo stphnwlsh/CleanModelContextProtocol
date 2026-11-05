@@ -2,7 +2,7 @@ namespace CleanModelContextProtocol.Presentation.Serialization;
 
 using System.Text.Json.Serialization;
 using Application.Versions.Entities;
-using CleanModelContextProtocol.Presentation.Models;
+using Presentation.Models;
 
 /// <summary>
 /// Generated JSON code for every type the tools, resources and prompts return, so they're written without reflection.

@@ -1,14 +1,14 @@
 namespace CleanModelContextProtocol.Presentation.Extensions;
 
 using System.Diagnostics.CodeAnalysis;
-#if includeAuth
-using CleanModelContextProtocol.Presentation.Authentication;
-#endif
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+#if includeAuth
+using Presentation.Authentication;
+#endif
 using Serilog;
 
 [ExcludeFromCodeCoverage]
