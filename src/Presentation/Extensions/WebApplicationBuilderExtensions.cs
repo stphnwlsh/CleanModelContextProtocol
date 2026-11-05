@@ -5,7 +5,7 @@ using System.Reflection;
 using Application;
 using Application.Common.Telemetry;
 using Application.Versions.Entities;
-#if auth
+#if includeAuth
 using CleanModelContextProtocol.Presentation.Authentication;
 #endif
 using CleanModelContextProtocol.Presentation.Completions;
@@ -13,14 +13,14 @@ using CleanModelContextProtocol.Presentation.Errors;
 using CleanModelContextProtocol.Presentation.Serialization;
 using CleanModelContextProtocol.Presentation.Telemetry;
 using Infrastructure;
-#if auth
+#if includeAuth
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 #endif
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-#if auth
+#if includeAuth
 using ModelContextProtocol.AspNetCore.Authentication;
 #endif
 using OpenTelemetry;
@@ -51,7 +51,7 @@ public static class WebApplicationBuilderExtensions
                 })
                 .AddHttpClientInstrumentation(options => options.RecordException = true))
             .WithMetrics(metrics => metrics
-#if auth
+#if includeAuth
                 .AddMeter(
                     "Microsoft.EntityFrameworkCore",
                     "Microsoft.AspNetCore.Authentication",
@@ -112,7 +112,7 @@ public static class WebApplicationBuilderExtensions
 
         #endregion Project Dependencies
 
-#if auth
+#if includeAuth
         #region Authentication
 
         var authentication = AuthenticationSettings.FromConfiguration(builder.Configuration);

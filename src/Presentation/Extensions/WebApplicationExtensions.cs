@@ -1,7 +1,7 @@
 namespace CleanModelContextProtocol.Presentation.Extensions;
 
 using System.Diagnostics.CodeAnalysis;
-#if auth
+#if includeAuth
 using CleanModelContextProtocol.Presentation.Authentication;
 #endif
 using Infrastructure;
@@ -40,7 +40,7 @@ public static class WebApplicationExtensions
 
         #endregion Logging
 
-#if auth
+#if includeAuth
         #region Authentication
 
         if (AuthenticationSettings.FromConfiguration(app.Configuration).Enabled)
@@ -56,7 +56,7 @@ public static class WebApplicationExtensions
         #region Health
 
         // Liveness runs no checks, so it only fails when the process can't answer. Readiness checks the database.
-#if auth
+#if includeAuth
         // They aren't behind authorization, so they answer without a token.
 #endif
         _ = app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
@@ -66,7 +66,7 @@ public static class WebApplicationExtensions
 
         #region Model Context Protocol
 
-#if auth
+#if includeAuth
         _ = app.MapMcp("/mcp").RequireAuthorization();
 #else
         _ = app.MapMcp("/mcp");
