@@ -1,6 +1,6 @@
 namespace CleanModelContextProtocol.Presentation.Errors;
 
-using CleanModelContextProtocol.Application.Common.Exceptions;
+using Application.Common.Exceptions;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

@@ -1,7 +1,7 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Integration.Tools;
 
-using CleanModelContextProtocol.Presentation.Models;
 using ModelContextProtocol;
+using Presentation.Models;
 using Shouldly;
 using Xunit;
 

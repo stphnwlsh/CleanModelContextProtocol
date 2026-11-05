@@ -2,8 +2,8 @@ namespace CleanModelContextProtocol.Presentation.Tests.Unit.Telemetry;
 
 using System.Reflection;
 using System.Reflection.Emit;
-using CleanModelContextProtocol.Presentation.Telemetry;
 using Microsoft.Extensions.Configuration;
+using Presentation.Telemetry;
 using Shouldly;
 using Xunit;
 

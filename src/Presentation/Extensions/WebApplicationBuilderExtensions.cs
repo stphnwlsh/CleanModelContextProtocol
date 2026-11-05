@@ -5,11 +5,6 @@ using System.Reflection;
 using Application;
 using Application.Common.Telemetry;
 using Application.Versions.Entities;
-using CleanModelContextProtocol.Presentation.Authentication;
-using CleanModelContextProtocol.Presentation.Completions;
-using CleanModelContextProtocol.Presentation.Errors;
-using CleanModelContextProtocol.Presentation.Serialization;
-using CleanModelContextProtocol.Presentation.Telemetry;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +16,11 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Presentation.Authentication;
+using Presentation.Completions;
+using Presentation.Errors;
+using Presentation.Serialization;
+using Presentation.Telemetry;
 using Serilog;
 
 [ExcludeFromCodeCoverage]

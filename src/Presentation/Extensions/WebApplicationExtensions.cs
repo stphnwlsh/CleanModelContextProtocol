@@ -1,12 +1,12 @@
 namespace CleanModelContextProtocol.Presentation.Extensions;
 
 using System.Diagnostics.CodeAnalysis;
-using CleanModelContextProtocol.Presentation.Authentication;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Presentation.Authentication;
 using Serilog;
 
 [ExcludeFromCodeCoverage]

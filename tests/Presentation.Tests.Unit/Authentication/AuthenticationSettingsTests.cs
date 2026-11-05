@@ -1,7 +1,7 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Unit.Authentication;
 
-using CleanModelContextProtocol.Presentation.Authentication;
 using Microsoft.Extensions.Configuration;
+using Presentation.Authentication;
 using Shouldly;
 using Xunit;
 
