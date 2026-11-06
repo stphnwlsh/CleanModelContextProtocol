@@ -9,7 +9,7 @@ metadata:
 
 ## The rule
 
-Tool arguments, tool results, resources and prompt attachments all use one set of options: `McpSerializer.Options` in `src/Presentation/Serialization/McpSerializer.cs`. It starts from the SDK's `McpJsonUtilities.DefaultOptions`, then sets camelCase names and leaves nulls out, and puts `AppJsonSerializerContext` first in the resolver chain so the listed types use generated code. The options are read-only once built.
+Tool arguments, tool results, resources and prompt attachments all use one set of options: `McpSerializer.Options` in `src/Presentation/Serialization/McpSerializer.cs`. It starts from the SDK's `McpJsonUtilities.DefaultOptions`, then sets camelCase names and writes nulls, because tool output schemas list nullable fields such as `nextOffset` as required and strict clients reject a result that leaves them out, and puts `AppJsonSerializerContext` first in the resolver chain so the listed types use generated code. The options are read-only once built.
 
 | Used by | How |
 | --- | --- |
@@ -22,6 +22,8 @@ Tool arguments, tool results, resources and prompt attachments all use one set o
 Results are trees. A review inside a movie carries the movie's id and title, not the movie, so there's no cycle handling.
 
 Tool schemas are generated from the C# types, and a nullable field comes out as `"type": ["string", "null"]`. That's valid JSON Schema, but clients that map schemas onto a single-type dialect, such as Gemini's function declarations, can reject it or drop its constraints. `PortableSchemaFilter` rewrites each one to an `anyOf` of single types when tools are listed, keeping `description`, `title` and `default` on the outer node. It runs for every tool, so a new tool needs nothing extra. `ListTools_ShouldWrite_PortableSchemas` fails if a type array gets through.
+
+The filter is a workaround for those clients, and nothing else needs it. Delete it, with that test, once they accept type arrays. To check, take it out and confirm the Inspector shows no schema portability warnings on any tool.
 
 ## Steps
 
@@ -37,7 +39,7 @@ Tool schemas are generated from the C# types, and a nullable field comes out as 
 var options = new JsonSerializerOptions(McpJsonUtilities.DefaultOptions)
 {
     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    DefaultIgnoreCondition = JsonIgnoreCondition.Never
 };
 options.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 options.MakeReadOnly();
