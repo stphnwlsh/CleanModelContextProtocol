@@ -23,6 +23,8 @@ Results are trees. A review inside a movie carries the movie's id and title, not
 
 Tool schemas are generated from the C# types, and a nullable field comes out as `"type": ["string", "null"]`. That's valid JSON Schema, but clients that map schemas onto a single-type dialect, such as Gemini's function declarations, can reject it or drop its constraints. `PortableSchemaFilter` rewrites each one to an `anyOf` of single types when tools are listed, keeping `description`, `title` and `default` on the outer node. It runs for every tool, so a new tool needs nothing extra. `ListTools_ShouldWrite_PortableSchemas` fails if a type array gets through.
 
+The filter is a workaround for those clients, and nothing else needs it. Delete it, with that test, once they accept type arrays. To check, take it out and confirm the Inspector shows no schema portability warnings on any tool.
+
 ## Steps
 
 1. Add every new result model, and the `ResultPage<T>` you return, to `AppJsonSerializerContext` with `[JsonSerializable(typeof(...))]`.

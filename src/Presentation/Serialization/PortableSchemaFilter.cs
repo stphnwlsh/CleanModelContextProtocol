@@ -10,6 +10,10 @@ using ModelContextProtocol.Server;
 /// Both are valid JSON Schema, but clients that map schemas onto a single-type dialect, such as Gemini's function
 /// declarations, can reject the first form or drop its constraints.
 /// </summary>
+/// <remarks>
+/// This is a workaround for those single-type dialects, and nothing else needs it. Remove it once they accept JSON
+/// Schema type arrays.
+/// </remarks>
 public static class PortableSchemaFilter
 {
     private static readonly HashSet<string> OuterKeywords = ["default", "description", "title"];
