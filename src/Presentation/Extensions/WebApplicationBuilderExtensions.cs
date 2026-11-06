@@ -192,6 +192,7 @@ public static class WebApplicationBuilderExtensions
             .WithCompleteHandler(CompletionHandler.Handle)
             .WithRequestFilters(filters =>
             {
+                filters.AddListToolsFilter(PortableSchemaFilter.Filter);
                 filters.AddCallToolFilter(ToolErrorFilter.Filter);
                 filters.AddReadResourceFilter(ProtocolErrorFilter.Filter);
                 filters.AddGetPromptFilter(ProtocolErrorFilter.Filter);
