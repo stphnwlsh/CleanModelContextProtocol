@@ -86,6 +86,8 @@ Yes, the sample movies are named by a corporate buzzword generator, and the crit
 
 Curl is a fine way to prove it works and a terrible way to spend an afternoon. Open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) at <http://localhost:6274> instead. It's already pointed at the server, so flip the switch to connect and open **Tools**.
 
+For a chat over the same tools, `docker compose --profile demo up -d --build` adds [Open WebUI](https://github.com/open-webui/open-webui) at <http://localhost:3000>. It's optional and online only, and your prompts go to Kilo's free gateway, a third party. [Run it](docs/RUN.md#chat-demo) has the details.
+
 There are six tools shaped around jobs rather than tables: `movies_search`, `movies_get`, `authors_search`, `reviews_list`, `reviews_write` and `reviews_delete`. Each has a description written for agents and hints that say what's read-only and what's destructive. Lists come back ten at a time, with a `totalCount` and a `nextOffset` when there's more to come, so an agent doesn't drown in its own context window. There are resources for every movie, author and review, and prompts for jobs like comparing two movies. Its logs, traces and metrics land in the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone) at <http://localhost:18888>.
 
 No Docker? `dotnet run --project src/Presentation` works too. Every other way to run it, from plain `docker run` to stamping a version into the image, is in [docs/RUN.md](docs/RUN.md).

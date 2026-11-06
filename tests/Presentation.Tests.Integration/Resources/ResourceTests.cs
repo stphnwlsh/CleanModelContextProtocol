@@ -22,15 +22,27 @@ public class ResourceTests : BaseToolTests
     }
 
     [Fact]
-    public async Task ListResources_ShouldReturn_ServerVersion()
+    public async Task ListResources_ShouldReturn_EveryResource()
     {
         // Act
         var resources = await this.Client.ListResourcesAsync();
 
         // Assert
-        var resource = resources.ShouldHaveSingleItem();
-        resource.Uri.ShouldBe("server://version");
-        resource.MimeType.ShouldBe("application/json");
+        resources.Select(r => r.Uri).ShouldBe(["server://version", "movies://top-rated"], ignoreOrder: true);
+        resources.ShouldAllBe(r => r.MimeType == "application/json");
+    }
+
+    [Fact]
+    public async Task ReadTopRated_ShouldReturn_BestMoviesFirst()
+    {
+        // Act
+        var page = await this.ReadAsync<ResultPage<MovieResult>>("movies://top-rated");
+
+        // Assert
+        page.Items.Count.ShouldBe(10);
+        page.NextOffset.ShouldBeNull();
+        page.Items.ShouldAllBe(m => m.ReviewCount > 0);
+        page.Items.Select(m => m.AverageStars).ShouldBeInOrder(SortDirection.Descending);
     }
 
     [Fact]
