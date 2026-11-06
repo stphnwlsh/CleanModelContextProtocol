@@ -42,6 +42,10 @@ Anything else is unexpected. `ToolErrorFilter` logs it as `Error` and returns `E
 5. When a tool, resource or prompt is added, renamed or changes behaviour, update `ServerInstructions` in the same change.
 6. Test the annotations in `ToolListTests` and each error message in the tool's integration tests (`test-design`).
 
+## Resource links
+
+Every tool that returns a movie, author or review also returns a `resource_link` block for it, as well as its structured content. The link's URI is the matching resource template, its name is the item's title or name, and its mime type is `application/json`. `ResourceLinkFilter` adds them, because a tool that returns a typed result has no way to add a content block itself. It takes the scheme from the start of the tool's name, so a new tool only has to follow the `movies_get` naming and return an `id`.
+
 ## Example
 
 ```csharp
@@ -59,6 +63,7 @@ NotFoundException => $"Not Found: {exception.Message} Check the ids: movies_sear
 
 - Throw from a tool to report a problem the model can fix. Let the filter return an error result.
 - Return an unbounded list.
+- Build a `CallToolResult` by hand in a tool to add a link. `ResourceLinkFilter` does that for every tool.
 - Name tools after Application classes (`GetMovieByIdQuery`) or use camelCase or dashes.
 - Leave `ServerInstructions` describing tools that changed.
 - Put internal detail (stack traces, SQL) in an error message.

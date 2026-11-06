@@ -27,6 +27,7 @@ using Presentation.Completions;
 using Presentation.Errors;
 using Presentation.Serialization;
 using Presentation.Telemetry;
+using Presentation.Tools;
 using Serilog;
 
 [ExcludeFromCodeCoverage]
@@ -194,6 +195,7 @@ public static class WebApplicationBuilderExtensions
             {
                 filters.AddListToolsFilter(PortableSchemaFilter.Filter);
                 filters.AddCallToolFilter(ToolErrorFilter.Filter);
+                filters.AddCallToolFilter(ResourceLinkFilter.Filter);
                 filters.AddReadResourceFilter(ProtocolErrorFilter.Filter);
                 filters.AddGetPromptFilter(ProtocolErrorFilter.Filter);
             });
