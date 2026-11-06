@@ -6,6 +6,7 @@
     "MCP",
     "Service",
     "Model Context Protocol",
+    "Lean Mean Clean Apps",
     "Clean Architecture"
   ],
   "identity": "CleanModelContextProtocol.Template",
@@ -16,7 +17,9 @@
   "description": "A Model Context Protocol server on the MCP C# SDK and .NET 10, built with Clean Architecture minus the ceremony.",
   "shortName": [
     "cleanmodelcontextprotocol",
-    "cleanmcp"
+    "cleanmcp",
+    "lmca-mcp",
+    "leanmeancleanapps-mcp"
   ],
   "tags": {
     "language": "C#",
