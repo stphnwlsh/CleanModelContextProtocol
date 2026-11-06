@@ -16,7 +16,7 @@ public class PromptTests : BaseToolTests
         var prompts = await this.Client.ListPromptsAsync();
 
         // Assert
-        prompts.Select(p => p.Name).ShouldBe(["summarise_movie_reception", "compare_movies", "review_movie"], ignoreOrder: true);
+        prompts.Select(p => p.Name).ShouldBe(["summarise_movie_reception", "compare_movies", "review_movie", "summarise_author_reviews"], ignoreOrder: true);
 
         foreach (var prompt in prompts)
         {
@@ -25,6 +25,49 @@ public class PromptTests : BaseToolTests
             prompt.ProtocolPrompt.Arguments.ShouldNotBeEmpty();
             prompt.ProtocolPrompt.Arguments.ShouldAllBe(a => a.Required == true && !string.IsNullOrWhiteSpace(a.Description));
         }
+    }
+
+    [Fact]
+    public async Task SummariseAuthorReviews_ShouldEmbed_Author()
+    {
+        // Arrange
+        var author = (await this.CallAsync<ResultPage<AuthorResult>>("authors_search")).Items[0];
+
+        // Act
+        var result = await this.Client.GetPromptAsync("summarise_author_reviews",
+            new Dictionary<string, object?> { ["authorName"] = author.Name.ToUpperInvariant() });
+
+        // Assert
+        result.Messages.Count.ShouldBe(2);
+        result.Messages[0].Content.ShouldBeOfType<TextContentBlock>().Text.ShouldContain(author.Name);
+
+        var embedded = result.Messages[1].Content.ShouldBeOfType<EmbeddedResourceBlock>().Resource.ShouldBeOfType<TextResourceContents>();
+
+        embedded.Uri.ShouldBe($"authors://{author.Id}");
+        embedded.Text.Deserialize<AuthorResult>().Reviews.ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task SummariseAuthorReviews_WithUnknownName_ShouldAsk_ToSearch()
+    {
+        // Act
+        var result = await this.Client.GetPromptAsync("summarise_author_reviews",
+            new Dictionary<string, object?> { ["authorName"] = "No Such Author" });
+
+        // Assert
+        var message = result.Messages.ShouldHaveSingleItem();
+        message.Content.ShouldBeOfType<TextContentBlock>().Text.ShouldContain("Find them with authors_search");
+    }
+
+    [Fact]
+    public async Task SummariseAuthorReviews_WithLongName_ShouldThrow_InvalidParams()
+    {
+        // Act
+        var exception = await Should.ThrowAsync<McpProtocolException>(() => this.Client.GetPromptAsync("summarise_author_reviews",
+            new Dictionary<string, object?> { ["authorName"] = new string('a', 201) }).AsTask());
+
+        // Assert
+        exception.ErrorCode.ShouldBe(McpErrorCode.InvalidParams);
     }
 
     [Fact]

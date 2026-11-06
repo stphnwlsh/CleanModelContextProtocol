@@ -63,6 +63,19 @@ public class CompletionTests : BaseToolTests
     }
 
     [Fact]
+    public async Task CompleteAuthorName_OnAuthorPrompt_ShouldReturn_MatchingNames()
+    {
+        // Arrange
+        var author = (await this.CallAsync<ResultPage<AuthorResult>>("authors_search")).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new PromptReference { Name = "summarise_author_reviews" }, "authorName", author.Name[..3]);
+
+        // Assert
+        result.Completion.Values.ShouldContain(author.Name);
+    }
+
+    [Fact]
     public async Task CompleteReviewId_ShouldFind_ReviewBeyondTheFirstPage()
     {
         // Arrange
