@@ -63,10 +63,120 @@ public class CompletionTests : BaseToolTests
     }
 
     [Fact]
-    public async Task Complete_ResourceTemplate_ShouldReturn_Nothing()
+    public async Task CompleteMovieId_ShouldMatch_Title()
+    {
+        // Arrange
+        var movie = (await this.CallAsync<ResultPage<MovieResult>>("movies_search")).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "movies://{movieId}" }, "movieId", movie.Title);
+
+        // Assert
+        result.Completion.Values.ShouldContain(movie.Id.ToString());
+    }
+
+    [Fact]
+    public async Task CompleteMovieId_ShouldMatch_IdPrefix()
+    {
+        // Arrange
+        var movie = (await this.CallAsync<ResultPage<MovieResult>>("movies_search")).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "movies://{movieId}" }, "movieId", movie.Id.ToString()[..8]);
+
+        // Assert
+        result.Completion.Values.ShouldBe([movie.Id.ToString()]);
+    }
+
+    [Fact]
+    public async Task CompleteAuthorId_ShouldMatch_Name()
+    {
+        // Arrange
+        var author = (await this.CallAsync<ResultPage<AuthorResult>>("authors_search")).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "authors://{authorId}" }, "authorId", author.Name);
+
+        // Assert
+        result.Completion.Values.ShouldContain(author.Id.ToString());
+    }
+
+    [Fact]
+    public async Task CompleteAuthorId_ShouldMatch_IdPrefix()
+    {
+        // Arrange
+        var author = (await this.CallAsync<ResultPage<AuthorResult>>("authors_search")).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "authors://{authorId}" }, "authorId", author.Id.ToString()[..8]);
+
+        // Assert
+        result.Completion.Values.ShouldBe([author.Id.ToString()]);
+    }
+
+    [Fact]
+    public async Task CompleteReviewId_ShouldMatch_IdPrefix()
+    {
+        // Arrange
+        var review = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list")).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "reviews://{reviewId}" }, "reviewId", review.Id.ToString()[..8]);
+
+        // Assert
+        result.Completion.Values.ShouldContain(review.Id.ToString());
+    }
+
+    [Fact]
+    public async Task CompleteReviewId_ShouldMatch_MovieTitle()
+    {
+        // Arrange
+        var review = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list")).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "reviews://{reviewId}" }, "reviewId", review.MovieTitle!);
+
+        // Assert
+        result.Completion.Values.ShouldContain(review.Id.ToString());
+    }
+
+    [Theory]
+    [InlineData("movies://{movieId}", "movieId")]
+    [InlineData("authors://{authorId}", "authorId")]
+    [InlineData("reviews://{reviewId}", "reviewId")]
+    public async Task CompleteResourceId_WithEmptyValue_ShouldReturn_Ids(string uri, string argument)
     {
         // Act
-        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "movies://{movieId}" }, "movieId", "a");
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = uri }, argument, string.Empty);
+
+        // Assert
+        result.Completion.Values.ShouldNotBeEmpty();
+
+        foreach (var value in result.Completion.Values)
+        {
+            Guid.TryParse(value, out _).ShouldBeTrue();
+        }
+    }
+
+    [Theory]
+    [InlineData("movies://{movieId}", "movieId")]
+    [InlineData("authors://{authorId}", "authorId")]
+    [InlineData("reviews://{reviewId}", "reviewId")]
+    public async Task CompleteResourceId_WithNoMatch_ShouldReturn_Nothing(string uri, string argument)
+    {
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = uri }, argument, "zzz-no-match");
+
+        // Assert
+        result.Completion.Values.ShouldBeEmpty();
+        result.Completion.Total.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task CompleteUnknownResourceArgument_ShouldReturn_Nothing()
+    {
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "movies://{movieId}" }, "unknown", "a");
 
         // Assert
         result.Completion.Values.ShouldBeEmpty();
