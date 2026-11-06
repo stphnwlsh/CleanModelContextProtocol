@@ -11,11 +11,13 @@ public static partial class ReviewTools
 {
     /// <summary>
     /// List reviews with their star rating and the title and author of each, in movie-title order. Filter by movie, by
-    /// author or both, or pass a reviewId to get exactly one review. With no filters it pages through every review.
+    /// author, by words in the review or by a minimum star rating, or pass a reviewId to get exactly one review. With no filters it pages through every review.
     /// </summary>
     /// <param name="movieId">Only reviews of this movie. Use movies_search to find the id.</param>
     /// <param name="authorId">Only reviews by this author. Use authors_search to find the id.</param>
     /// <param name="reviewId">Get this one review instead of searching. The other filters are ignored.</param>
+    /// <param name="query">Only reviews whose text contains this, ignoring case, such as 'great film'. Leave empty for every review.</param>
+    /// <param name="minStars">Only reviews with at least this many stars, from 1 to 5. Leave empty for every rating.</param>
     /// <param name="offset">The number of results to skip, 0 for the first page. Pass the nextOffset from a previous call to get the next page.</param>
     /// <param name="limit">The most results to return, from 1 to 50.</param>
     [McpServerTool(Name = "reviews_list", Title = "List reviews", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true, IconSource = ItemIcons.Review)]
@@ -25,6 +27,8 @@ public static partial class ReviewTools
         Guid? movieId = null,
         Guid? authorId = null,
         Guid? reviewId = null,
+        string? query = null,
+        int? minStars = null,
         int offset = 0,
         int limit = 10)
     {
@@ -42,6 +46,8 @@ public static partial class ReviewTools
         {
             MovieId = movieId,
             AuthorId = authorId,
+            Query = query,
+            MinStars = minStars,
             Offset = offset,
             Limit = limit
         }, cancellationToken);

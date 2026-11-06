@@ -34,7 +34,7 @@ public class ReviewToolTests
             .Returns(new Page<Entities.Review>([SampleReview()], 2, 1, 3));
 
         // Act
-        var response = await ReviewTools.ListReviews(sender, CancellationToken.None, MovieId, AuthorId, null, 2, 1);
+        var response = await ReviewTools.ListReviews(sender, CancellationToken.None, MovieId, AuthorId, null, null, null, 2, 1);
 
         // Assert
         response.TotalCount.ShouldBe(3);

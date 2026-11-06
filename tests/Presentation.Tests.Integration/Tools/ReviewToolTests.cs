@@ -89,6 +89,18 @@ public class ReviewToolTests : BaseToolTests
     }
 
     [Fact]
+    public async Task ListReviews_ShouldFilter_ByTextAndStars()
+    {
+        // Act
+        var page = await this.CallAsync<ResultPage<ReviewResult>>("reviews_list",
+            new Dictionary<string, object?> { ["query"] = "great", ["minStars"] = 4, ["limit"] = 50 });
+
+        // Assert
+        page.Items.ShouldNotBeEmpty();
+        page.Items.ShouldAllBe(r => r.Stars >= 4 && r.Text!.Contains("great", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public async Task WriteReview_ShouldCreate_Review()
     {
         // Arrange
