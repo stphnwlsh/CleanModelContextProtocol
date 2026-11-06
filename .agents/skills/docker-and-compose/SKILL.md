@@ -23,6 +23,8 @@ One multi-stage `Dockerfile` does everything the pipeline needs:
 
 The Lambda template's `run` stage is the AWS Lambda .NET base image instead. It runs as user `65534` from `/var/task`, keeps its database in `/tmp`, and has no `HEALTHCHECK`. Its compose file runs the collector and the Aspire dashboard as well. Compose maps the runtime interface emulator to port 9000, so the function can be invoked with a `POST` to `/2015-03-31/functions/function/invocations`.
 
+The `demo` profile adds Open WebUI for a chat over the tools (`mcp-inspector`). Keep it behind the profile so plain `docker compose up` stays the same, and inside its `#if (!includeAuth)` blocks.
+
 ## Steps
 
 1. Keep restore before `COPY . .` so a code change doesn't redo the restore layer. A new project folder needs nothing extra; the loops pick up every `src/*/*.csproj` and `tests/*/*.csproj`.
