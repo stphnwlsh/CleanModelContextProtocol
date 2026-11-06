@@ -52,6 +52,9 @@ public static class CompletionHandler
                 return Result([.. page.Items.Select(m => m.Title)], page.TotalCount);
             }
 
+            case "movieId":
+                return await CompleteResourceId(sender, argument, cancellationToken);
+
             case "authorName":
             {
                 var page = await sender.Send(new AuthorQueries.GetAuthors.GetAuthorsQuery

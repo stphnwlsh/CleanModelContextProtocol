@@ -102,6 +102,19 @@ public class CompletionTests : BaseToolTests
     }
 
     [Fact]
+    public async Task CompleteMovieId_OnMovieReviewsPrompt_ShouldReturn_Ids()
+    {
+        // Arrange
+        var movie = (await this.CallAsync<ResultPage<MovieResult>>("movies_search")).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new PromptReference { Name = "summarise_movie_reviews" }, "movieId", movie.Title);
+
+        // Assert
+        result.Completion.Values.ShouldContain(movie.Id.ToString());
+    }
+
+    [Fact]
     public async Task CompleteMovieId_ShouldMatch_Title()
     {
         // Arrange
