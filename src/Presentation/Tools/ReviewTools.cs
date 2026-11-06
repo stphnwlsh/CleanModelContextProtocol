@@ -50,14 +50,15 @@ public static partial class ReviewTools
     }
 
     /// <summary>
-    /// Create a review of a movie by an author with a star rating from 1 to 5, or pass a reviewId to change that review's
-    /// stars. The movie and author of a review can't change. Returns the saved review. Without a reviewId every call
+    /// Create a review of a movie by an author with a star rating from 1 to 5 and optional text, or pass a reviewId to change
+    /// that review's stars and text. The movie and author of a review can't change. Returns the saved review. Without a reviewId every call
     /// creates another review, so don't retry a call that succeeded.
     /// </summary>
     /// <param name="stars">The star rating, a whole number from 1 (worst) to 5 (best).</param>
     /// <param name="movieId">The id of the movie being reviewed, needed to create a review. Use movies_search to find it.</param>
     /// <param name="authorId">The id of the author writing the review, needed to create a review. Use authors_search to find it.</param>
-    /// <param name="reviewId">The id of an existing review to change the stars of. Leave empty to create a new review.</param>
+    /// <param name="reviewId">The id of an existing review to change. Leave empty to create a new review.</param>
+    /// <param name="text">What the author has to say about the movie, up to 1000 characters. Leave empty when changing a review to keep its text.</param>
     [McpServerTool(Name = "reviews_write", Title = "Write review", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
     public static async partial Task<ReviewResult> WriteReview(
         ISender sender,
@@ -65,7 +66,8 @@ public static partial class ReviewTools
         CancellationToken cancellationToken,
         Guid? movieId = null,
         Guid? authorId = null,
-        Guid? reviewId = null)
+        Guid? reviewId = null,
+        string? text = null)
     {
         if (!reviewId.HasValue)
         {
@@ -73,7 +75,8 @@ public static partial class ReviewTools
             {
                 AuthorId = authorId ?? Guid.Empty,
                 MovieId = movieId ?? Guid.Empty,
-                Stars = stars
+                Stars = stars,
+                Text = text
             }, cancellationToken);
 
             return created.ToResult();
@@ -82,7 +85,8 @@ public static partial class ReviewTools
         var updated = await sender.Send(new Commands.UpdateReview.UpdateReviewCommand
         {
             Id = reviewId.Value,
-            Stars = stars
+            Stars = stars,
+            Text = text
         }, cancellationToken);
 
         return updated.ToResult();

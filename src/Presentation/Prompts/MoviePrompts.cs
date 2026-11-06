@@ -88,7 +88,7 @@ public static partial class MoviePrompts
             [
                 Text($"I want to review the movie \"{movieTitle}\" as the author \"{authorName}\". Find the movie with movies_search " +
                     "and the author with authors_search. If either search doesn't return exactly one clear match, show me the closest " +
-                    "results and ask which one I meant. Ask me for a star rating from 1 to 5, then save the review with reviews_write " +
+                    "results and ask which one I meant. Ask me for a star rating from 1 to 5 and what I thought of it, then save the review with reviews_write " +
                     "and show me the saved review.")
             ]
         };

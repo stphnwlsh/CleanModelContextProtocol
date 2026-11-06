@@ -71,6 +71,20 @@ public class MovieToolTests : BaseToolTests
         result.StructuredContent.ShouldNotBeNull().GetProperty("nextOffset").ValueKind.ShouldBe(JsonValueKind.Null);
     }
 
+    [Theory]
+    [InlineData("space")]
+    [InlineData("love")]
+    [InlineData("murder")]
+    [InlineData("dragon")]
+    public async Task SearchMovies_ShouldFind_SampleMovies(string query)
+    {
+        // Act
+        var page = await this.CallAsync<ResultPage<MovieResult>>("movies_search", new Dictionary<string, object?> { ["query"] = query });
+
+        // Assert
+        page.Items.ShouldNotBeEmpty();
+    }
+
     [Fact]
     public async Task SearchMovies_ShouldFind_MovieByTitle()
     {
