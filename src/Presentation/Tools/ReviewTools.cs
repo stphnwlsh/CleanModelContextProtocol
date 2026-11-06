@@ -18,7 +18,7 @@ public static partial class ReviewTools
     /// <param name="reviewId">Get this one review instead of searching. The other filters are ignored.</param>
     /// <param name="offset">The number of results to skip, 0 for the first page. Pass the nextOffset from a previous call to get the next page.</param>
     /// <param name="limit">The most results to return, from 1 to 50.</param>
-    [McpServerTool(Name = "reviews_list", Title = "List reviews", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
+    [McpServerTool(Name = "reviews_list", Title = "List reviews", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true, IconSource = ItemIcons.Review)]
     public static async partial Task<ResultPage<ReviewResult>> ListReviews(
         ISender sender,
         CancellationToken cancellationToken,
@@ -58,7 +58,7 @@ public static partial class ReviewTools
     /// <param name="movieId">The id of the movie being reviewed, needed to create a review. Use movies_search to find it.</param>
     /// <param name="authorId">The id of the author writing the review, needed to create a review. Use authors_search to find it.</param>
     /// <param name="reviewId">The id of an existing review to change the stars of. Leave empty to create a new review.</param>
-    [McpServerTool(Name = "reviews_write", Title = "Write review", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true)]
+    [McpServerTool(Name = "reviews_write", Title = "Write review", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false, UseStructuredContent = true, IconSource = ItemIcons.Review)]
     public static async partial Task<ReviewResult> WriteReview(
         ISender sender,
         int stars,
@@ -90,7 +90,7 @@ public static partial class ReviewTools
 
     /// <summary>Permanently delete a review. This can't be undone, so confirm with the user first.</summary>
     /// <param name="reviewId">The id of the review to delete. Use reviews_list to find it.</param>
-    [McpServerTool(Name = "reviews_delete", Title = "Delete review", ReadOnly = false, Destructive = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
+    [McpServerTool(Name = "reviews_delete", Title = "Delete review", ReadOnly = false, Destructive = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true, IconSource = ItemIcons.Review)]
     public static async partial Task<DeletedReview> DeleteReview(
         ISender sender,
         Guid reviewId,

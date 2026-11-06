@@ -46,6 +46,10 @@ Anything else is unexpected. `ToolErrorFilter` logs it as `Error` and returns `E
 
 Every tool that returns a movie, author or review also returns a `resource_link` block for it, as well as its structured content. The link's URI is the matching resource template, its name is the item's title or name, and its mime type is `application/json`. `ResourceLinkFilter` adds them, because a tool that returns a typed result has no way to add a content block itself. It takes the scheme from the start of the tool's name, so a new tool only has to follow the `movies_get` naming and return an `id`.
 
+## Icons
+
+Every tool, prompt and resource sets `IconSource` to a constant in `ItemIcons`, which points at a pinned brand release like the server's icon. Use the icon for what the item is about, not what it does. A new item needs one, or `EveryItem_ShouldHave_AnIcon` fails.
+
 ## Example
 
 ```csharp
