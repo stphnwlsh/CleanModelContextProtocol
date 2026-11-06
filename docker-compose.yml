@@ -46,8 +46,38 @@ services:
       ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
     networks:
       - cleanmodelcontextprotocol_network
+  #if (!includeAuth)
+  # Optional chat over the MCP server: docker compose --profile demo up -d --build. Prompts go to Kilo, a third party.
+  chat:
+    image: ghcr.io/open-webui/open-webui:v0.13.0
+    profiles:
+      - demo
+    ports:
+      - "127.0.0.1:3000:8080"
+    environment:
+      # Kilo's free gateway takes no API key, and a dummy one gets a 401.
+      OPENAI_API_BASE_URL: https://api.kilo.ai/api/gateway
+      DEFAULT_MODELS: kilo-auto/free
+      ENABLE_OLLAMA_API: "False"
+      WEBUI_AUTH: "False"
+      TOOL_SERVER_CONNECTIONS: '[{"url":"http://api:8080/mcp","path":"","type":"mcp","auth_type":"none","key":"","config":{"enable":true},"info":{"id":"mcp","name":"MCP server"}}]'
+      # Turns the MCP server on in every chat, and leaves out Open WebUI's own tools so the model only sees ours.
+      DEFAULT_MODEL_METADATA: '{"toolIds":["server:mcp:mcp"],"capabilities":{"builtin_tools":false}}'
+      # These two skip the embedding model download from Hugging Face on first start.
+      OFFLINE_MODE: "True"
+      BYPASS_EMBEDDING_AND_RETRIEVAL: "True"
+    volumes:
+      - chat-data:/app/backend/data
+    networks:
+      - cleanmodelcontextprotocol_network
+    depends_on:
+      - api
+  #endif
 volumes:
   movie-reviews-data:
+  #if (!includeAuth)
+  chat-data:
+  #endif
 networks:
   cleanmodelcontextprotocol_network:
     driver: bridge
