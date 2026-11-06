@@ -95,6 +95,29 @@ public static partial class MoviePrompts
         };
     }
 
+    /// <summary>Summarise what reviewers actually said about a movie: the themes they agree on, where they disagree, and whether their words match their stars.</summary>
+    /// <param name="movieId">The movie's id (a GUID). Start typing its title or id for suggestions.</param>
+    [McpServerPrompt(Name = "summarise_movie_reviews", Title = "Summarise a movie's reviews", IconSource = ItemIcons.Review)]
+    public static async partial Task<GetPromptResult> SummariseMovieReviews(
+        ISender sender,
+        Guid movieId,
+        CancellationToken cancellationToken)
+    {
+        var movie = (await sender.Send(new Queries.GetMovieById.GetMovieByIdQuery { Id = movieId }, cancellationToken))
+            .ToResult(includeReviews: true);
+
+        return new GetPromptResult
+        {
+            Description = $"Summarise the reviews of {movie.Title}",
+            Messages =
+            [
+                PromptContent.Text($"Summarise what reviewers said about \"{movie.Title}\", using the movie below. Give the themes they " +
+                    "agree on, where they disagree, and whether their words match their stars."),
+                PromptContent.Embed($"movies://{movie.Id}", McpSerializer.Serialize(movie))
+            ]
+        };
+    }
+
     private static async Task<MovieResult?> FindMovie(ISender sender, string? title, CancellationToken cancellationToken)
     {
         var page = await sender.Send(new Queries.GetMovies.GetMoviesQuery

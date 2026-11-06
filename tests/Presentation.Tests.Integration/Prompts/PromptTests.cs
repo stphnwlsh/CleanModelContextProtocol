@@ -16,7 +16,7 @@ public class PromptTests : BaseToolTests
         var prompts = await this.Client.ListPromptsAsync();
 
         // Assert
-        prompts.Select(p => p.Name).ShouldBe(["summarise_movie_reception", "compare_movies", "review_movie", "summarise_author_reviews"], ignoreOrder: true);
+        prompts.Select(p => p.Name).ShouldBe(["summarise_movie_reception", "compare_movies", "review_movie", "summarise_author_reviews", "summarise_movie_reviews"], ignoreOrder: true);
 
         foreach (var prompt in prompts)
         {
@@ -25,6 +25,33 @@ public class PromptTests : BaseToolTests
             prompt.ProtocolPrompt.Arguments.ShouldNotBeEmpty();
             prompt.ProtocolPrompt.Arguments.ShouldAllBe(a => a.Required == true && !string.IsNullOrWhiteSpace(a.Description));
         }
+    }
+
+    [Fact]
+    public async Task SummariseMovieReviews_ShouldEmbed_Movie()
+    {
+        // Arrange
+        var movie = await this.FirstMovieAsync();
+
+        // Act
+        var result = await this.Client.GetPromptAsync("summarise_movie_reviews",
+            new Dictionary<string, object?> { ["movieId"] = movie.Id });
+
+        // Assert
+        result.Messages.Count.ShouldBe(2);
+        result.Messages[0].Content.ShouldBeOfType<TextContentBlock>().Text.ShouldContain(movie.Title);
+        ShouldEmbed(result.Messages[1], movie);
+    }
+
+    [Fact]
+    public async Task SummariseMovieReviews_WithUnknownId_ShouldThrow()
+    {
+        // Act
+        var exception = await Should.ThrowAsync<McpProtocolException>(() => this.Client.GetPromptAsync("summarise_movie_reviews",
+            new Dictionary<string, object?> { ["movieId"] = Guid.NewGuid() }).AsTask());
+
+        // Assert
+        exception.Message.ShouldNotBeNullOrWhiteSpace();
     }
 
     [Fact]
