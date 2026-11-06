@@ -63,6 +63,32 @@ public class CompletionTests : BaseToolTests
     }
 
     [Fact]
+    public async Task CompleteReviewId_ShouldFind_ReviewBeyondTheFirstPage()
+    {
+        // Arrange
+        var review = (await this.CallAsync<ResultPage<ReviewResult>>("reviews_list",
+            new Dictionary<string, object?> { ["offset"] = 120, ["limit"] = 1 })).Items[0];
+
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "reviews://{reviewId}" }, "reviewId", review.Id.ToString());
+
+        // Assert
+        result.Completion.Values.ShouldContain(review.Id.ToString());
+    }
+
+    [Fact]
+    public async Task CompleteReviewId_WithEmptyValue_ShouldCap_AtTheProtocolLimit()
+    {
+        // Act
+        var result = await this.Client.CompleteAsync(new ResourceTemplateReference { Uri = "reviews://{reviewId}" }, "reviewId", string.Empty);
+
+        // Assert
+        result.Completion.Values.Count.ShouldBe(100);
+        result.Completion.Total.ShouldBe(150);
+        result.Completion.HasMore.ShouldBe(true);
+    }
+
+    [Fact]
     public async Task CompleteMovieId_ShouldMatch_Title()
     {
         // Arrange

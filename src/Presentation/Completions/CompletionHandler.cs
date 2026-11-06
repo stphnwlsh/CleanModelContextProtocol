@@ -17,6 +17,9 @@ public static class CompletionHandler
 {
     private const int MaxQueryLength = 100;
 
+    // The most values the protocol allows in one completion.
+    private const int MaxValues = 100;
+
     public static async ValueTask<CompleteResult> Handle(RequestContext<CompleteRequestParams> context, CancellationToken cancellationToken)
     {
         return await Complete(context.Services!.GetRequiredService<ISender>(), context.Params, cancellationToken);
@@ -24,19 +27,14 @@ public static class CompletionHandler
 
     public static async Task<CompleteResult> Complete(ISender sender, CompleteRequestParams? request, CancellationToken cancellationToken)
     {
-        var argument = request?.Argument;
-
-        if (argument is null || argument.Value?.Length > MaxQueryLength)
+        if (request?.Argument is not { } argument || argument.Value.Length > MaxQueryLength)
         {
             return Empty();
         }
 
-        return request?.Ref switch
-        {
-            PromptReference => await CompletePromptArgument(sender, argument, cancellationToken),
-            ResourceTemplateReference => await CompleteResourceId(sender, argument, cancellationToken),
-            _ => Empty()
-        };
+        return request.Ref is PromptReference
+            ? await CompletePromptArgument(sender, argument, cancellationToken)
+            : await CompleteResourceId(sender, argument, cancellationToken);
     }
 
     private static async Task<CompleteResult> CompletePromptArgument(ISender sender, Argument argument, CancellationToken cancellationToken)
@@ -87,9 +85,13 @@ public static class CompletionHandler
                     return Result([.. page.Items.Select(m => m.Id.ToString())], page.TotalCount);
                 }
 
-                var movies = await sender.Send(new MovieQueries.GetMovies.GetMoviesQuery { Limit = Paging.MaxLimit }, cancellationToken);
+                var movies = await GetAll(offset => sender.Send(new MovieQueries.GetMovies.GetMoviesQuery
+                {
+                    Offset = offset,
+                    Limit = Paging.MaxLimit
+                }, cancellationToken));
 
-                return IdsStartingWith(movies.Items.Select(m => m.Id), argument.Value);
+                return IdsStartingWith(movies.Select(m => m.Id), argument.Value);
             }
 
             case "authorId":
@@ -105,22 +107,29 @@ public static class CompletionHandler
                     return Result([.. page.Items.Select(a => a.Id.ToString())], page.TotalCount);
                 }
 
-                var authors = await sender.Send(new AuthorQueries.GetAuthors.GetAuthorsQuery { Limit = Paging.MaxLimit }, cancellationToken);
+                var authors = await GetAll(offset => sender.Send(new AuthorQueries.GetAuthors.GetAuthorsQuery
+                {
+                    Offset = offset,
+                    Limit = Paging.MaxLimit
+                }, cancellationToken));
 
-                return IdsStartingWith(authors.Items.Select(a => a.Id), argument.Value);
+                return IdsStartingWith(authors.Select(a => a.Id), argument.Value);
             }
 
             case "reviewId":
             {
-                var reviews = await sender.Send(new ReviewQueries.GetReviews.GetReviewsQuery { Limit = Paging.MaxLimit }, cancellationToken);
-                var value = argument.Value ?? string.Empty;
-                var matches = reviews.Items
-                    .Where(r => r.Id.ToString().StartsWith(value, StringComparison.OrdinalIgnoreCase)
-                        || (r.ReviewedMovie?.Title.Contains(value, StringComparison.OrdinalIgnoreCase) ?? false))
+                var reviews = await GetAll(offset => sender.Send(new ReviewQueries.GetReviews.GetReviewsQuery
+                {
+                    Offset = offset,
+                    Limit = Paging.MaxLimit
+                }, cancellationToken));
+                var matches = reviews
+                    .Where(r => r.Id.ToString().StartsWith(argument.Value, StringComparison.OrdinalIgnoreCase)
+                        || (r.ReviewedMovie?.Title.Contains(argument.Value, StringComparison.OrdinalIgnoreCase) ?? false))
                     .Select(r => r.Id.ToString())
                     .ToList();
 
-                return Result(matches, matches.Count);
+                return Capped(matches);
             }
 
             default:
@@ -128,14 +137,34 @@ public static class CompletionHandler
         }
     }
 
-    private static CompleteResult IdsStartingWith(IEnumerable<Guid> ids, string? value)
+    private static CompleteResult IdsStartingWith(IEnumerable<Guid> ids, string value)
     {
         var matches = ids
             .Select(i => i.ToString())
-            .Where(i => i.StartsWith(value ?? string.Empty, StringComparison.OrdinalIgnoreCase))
+            .Where(i => i.StartsWith(value, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        return Result(matches, matches.Count);
+        return Capped(matches);
+    }
+
+    private static async Task<List<T>> GetAll<T>(Func<int, ValueTask<Page<T>>> getPage)
+    {
+        var items = new List<T>();
+        Page<T> page;
+
+        do
+        {
+            page = await getPage(items.Count);
+            items.AddRange(page.Items);
+        }
+        while (items.Count < page.TotalCount);
+
+        return items;
+    }
+
+    private static CompleteResult Capped(List<string> matches)
+    {
+        return Result([.. matches.Take(MaxValues)], matches.Count);
     }
 
     private static CompleteResult Result(List<string> values, int total)
