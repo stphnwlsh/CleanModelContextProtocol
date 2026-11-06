@@ -96,11 +96,12 @@ public class ReviewToolTests : BaseToolTests
 
         // Act
         var review = await this.CallAsync<ReviewResult>("reviews_write",
-            new Dictionary<string, object?> { ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 5 });
+            new Dictionary<string, object?> { ["movieId"] = movie.Id, ["authorId"] = author.Id, ["stars"] = 5, ["text"] = "Great film" });
 
         // Assert
         review.Id.ShouldNotBe(Guid.Empty);
         review.Stars.ShouldBe(5);
+        review.Text.ShouldBe("Great film");
         review.MovieId.ShouldBe(movie.Id);
         review.MovieTitle.ShouldBe(movie.Title);
         review.AuthorId.ShouldBe(author.Id);

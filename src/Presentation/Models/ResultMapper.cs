@@ -65,7 +65,8 @@ public static class ResultMapper
             movie?.Id,
             movie?.Title,
             author?.Id,
-            author is null ? null : FullName(author.FirstName, author.LastName));
+            author is null ? null : FullName(author.FirstName, author.LastName),
+            review.Text);
     }
 
     public static ResultPage<TResult> ToResult<T, TResult>(this Page<T> page, Func<T, TResult> map)
