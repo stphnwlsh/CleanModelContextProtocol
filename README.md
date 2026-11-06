@@ -24,7 +24,7 @@ dotnet new cleanmodelcontextprotocol --name WorksOnMyMachine.Movies --authorName
 cd WorksOnMyMachine.Movies
 ```
 
-`cleanmcp` works too, for anyone who'd rather not type `cleanmodelcontextprotocol` every time.
+`cleanmcp` works too, for anyone who'd rather not type `cleanmodelcontextprotocol` every time, and so do `lmca-mcp` and `leanmeancleanapps-mcp`. `dotnet new search leanmeanclean` lists the whole family.
 
 | Option | Default | What it does |
 | --- | --- | --- |
