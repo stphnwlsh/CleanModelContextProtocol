@@ -1,5 +1,6 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Integration.Tools;
 
+using System.Text.Json;
 using Shouldly;
 using Xunit;
 
@@ -55,6 +56,20 @@ public class ToolListTests : BaseToolTests
     }
 
     [Fact]
+    public async Task ListTools_ShouldWrite_PortableSchemas()
+    {
+        // Act
+        var tools = await this.Client.ListToolsAsync();
+
+        // Assert
+        foreach (var tool in tools.Select(t => t.ProtocolTool))
+        {
+            HasTypeArray(tool.InputSchema).ShouldBeFalse(tool.Name);
+            HasTypeArray(tool.OutputSchema.ShouldNotBeNull()).ShouldBeFalse(tool.Name);
+        }
+    }
+
+    [Fact]
     public async Task ServerInfo_ShouldDescribe_Server()
     {
         // Assert
@@ -65,5 +80,16 @@ public class ToolListTests : BaseToolTests
         this.Client.ServerInstructions.ShouldNotBeNullOrWhiteSpace();
 
         await Task.CompletedTask;
+    }
+
+    private static bool HasTypeArray(JsonElement schema)
+    {
+        if (schema.ValueKind == JsonValueKind.Array)
+        {
+            return schema.EnumerateArray().Any(HasTypeArray);
+        }
+
+        return schema.ValueKind == JsonValueKind.Object && schema.EnumerateObject().Any(p =>
+            (p.Name == "type" && p.Value.ValueKind == JsonValueKind.Array) || HasTypeArray(p.Value));
     }
 }
