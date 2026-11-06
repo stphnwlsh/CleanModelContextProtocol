@@ -70,6 +70,22 @@ public class ToolListTests : BaseToolTests
     }
 
     [Fact]
+    public async Task EveryItem_ShouldHave_AnIcon()
+    {
+        // Act
+        var tools = await this.Client.ListToolsAsync();
+        var prompts = await this.Client.ListPromptsAsync();
+        var resources = await this.Client.ListResourcesAsync();
+        var templates = await this.Client.ListResourceTemplatesAsync();
+
+        // Assert
+        tools.ShouldAllBe(t => t.ProtocolTool.Icons!.Count == 1);
+        prompts.ShouldAllBe(p => p.ProtocolPrompt.Icons!.Count == 1);
+        resources.ShouldAllBe(r => r.ProtocolResource.Icons!.Count == 1);
+        templates.ShouldAllBe(t => t.ProtocolResourceTemplate.Icons!.Count == 1);
+    }
+
+    [Fact]
     public async Task ServerInfo_ShouldDescribe_Server()
     {
         // Assert

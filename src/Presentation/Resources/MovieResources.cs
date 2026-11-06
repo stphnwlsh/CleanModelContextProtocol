@@ -4,6 +4,7 @@ using Mediator;
 using ModelContextProtocol.Server;
 using Presentation.Models;
 using Presentation.Serialization;
+using Presentation.Tools;
 using Queries = Application.Movies.Queries;
 
 [McpServerResourceType]
@@ -11,7 +12,7 @@ public static partial class MovieResources
 {
     /// <summary>A movie with its review count, average stars and every review, including each author's name.</summary>
     /// <param name="movieId">The movie's id (a GUID).</param>
-    [McpServerResource(UriTemplate = "movies://{movieId}", Name = "movie", Title = "Movie", MimeType = "application/json")]
+    [McpServerResource(UriTemplate = "movies://{movieId}", Name = "movie", Title = "Movie", MimeType = "application/json", IconSource = ItemIcons.Movie)]
     public static async partial Task<string> GetMovie(
         ISender sender,
         Guid movieId,
