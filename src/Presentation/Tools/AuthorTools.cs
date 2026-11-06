@@ -18,7 +18,7 @@ public static partial class AuthorTools
     /// <param name="offset">The number of results to skip, 0 for the first page. Pass the nextOffset from a previous call to get the next page.</param>
     /// <param name="limit">The most results to return, from 1 to 50.</param>
     /// <param name="includeReviews">Also return every review each author has written. Leave false unless you need the individual reviews.</param>
-    [McpServerTool(Name = "authors_search", Title = "Search authors", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
+    [McpServerTool(Name = "authors_search", Title = "Search authors", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true, IconSource = ItemIcons.Author)]
     public static async partial Task<ResultPage<AuthorResult>> SearchAuthors(
         ISender sender,
         CancellationToken cancellationToken,

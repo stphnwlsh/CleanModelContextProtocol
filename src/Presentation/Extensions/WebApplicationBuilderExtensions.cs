@@ -183,7 +183,8 @@ public static class WebApplicationBuilderExtensions
                     reviews_write creates a review, or changes the stars of one when you pass its reviewId. A review's movie and author can't change.
                     reviews_delete can't be undone, so confirm with the user before calling it.
                     Each movie, author and review can also be read as a resource at movies://{id}, authors://{id} or
-                    reviews://{id}, and server://version gives this server's version.
+                    reviews://{id}. movies://top-rated lists the ten best rated movies, and server://version gives this
+                    server's version.
                     """;
             })
             .WithHttpTransport(options => options.Stateless = true)

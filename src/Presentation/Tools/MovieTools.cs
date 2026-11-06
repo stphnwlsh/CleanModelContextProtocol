@@ -18,7 +18,7 @@ public static partial class MovieTools
     /// <param name="offset">The number of results to skip, 0 for the first page. Pass the nextOffset from a previous call to get the next page.</param>
     /// <param name="limit">The most results to return, from 1 to 50.</param>
     /// <param name="includeReviews">Also return every review of each movie. Leave false unless you need the individual reviews.</param>
-    [McpServerTool(Name = "movies_search", Title = "Search movies", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
+    [McpServerTool(Name = "movies_search", Title = "Search movies", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true, IconSource = ItemIcons.Movie)]
     public static async partial Task<ResultPage<MovieResult>> SearchMovies(
         ISender sender,
         CancellationToken cancellationToken,
@@ -50,7 +50,7 @@ public static partial class MovieTools
 
     /// <summary>Get one movie with its review count, average stars and every review, including each author's name.</summary>
     /// <param name="movieId">The movie's id (a GUID). Use movies_search to find it.</param>
-    [McpServerTool(Name = "movies_get", Title = "Get movie", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true)]
+    [McpServerTool(Name = "movies_get", Title = "Get movie", ReadOnly = true, Idempotent = true, OpenWorld = false, UseStructuredContent = true, IconSource = ItemIcons.Movie)]
     public static async partial Task<MovieResult> GetMovie(
         ISender sender,
         Guid movieId,

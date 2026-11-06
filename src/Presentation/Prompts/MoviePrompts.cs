@@ -5,6 +5,7 @@ using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using Presentation.Models;
 using Presentation.Serialization;
+using Presentation.Tools;
 using Queries = Application.Movies.Queries;
 
 [McpServerPromptType]
@@ -12,7 +13,7 @@ public static partial class MoviePrompts
 {
     /// <summary>Summarise how reviewers have received a movie: its average stars, how the ratings spread, and who liked it most and least.</summary>
     /// <param name="movieTitle">The movie's title, or part of it.</param>
-    [McpServerPrompt(Name = "summarise_movie_reception", Title = "Summarise a movie's reception")]
+    [McpServerPrompt(Name = "summarise_movie_reception", Title = "Summarise a movie's reception", IconSource = ItemIcons.Movie)]
     public static async partial Task<GetPromptResult> SummariseMovieReception(
         ISender sender,
         string movieTitle,
@@ -44,7 +45,7 @@ public static partial class MoviePrompts
     /// <summary>Compare how reviewers rated two movies, and say which one they preferred and by how much.</summary>
     /// <param name="firstMovieTitle">The first movie's title, or part of it.</param>
     /// <param name="secondMovieTitle">The second movie's title, or part of it.</param>
-    [McpServerPrompt(Name = "compare_movies", Title = "Compare two movies")]
+    [McpServerPrompt(Name = "compare_movies", Title = "Compare two movies", IconSource = ItemIcons.Movie)]
     public static async partial Task<GetPromptResult> CompareMovies(
         ISender sender,
         string firstMovieTitle,
@@ -76,7 +77,7 @@ public static partial class MoviePrompts
     /// <summary>Write a review of a movie as one of the authors, checking the movie and author before saving it.</summary>
     /// <param name="movieTitle">The movie's title, or part of it.</param>
     /// <param name="authorName">The name of the author writing the review.</param>
-    [McpServerPrompt(Name = "review_movie", Title = "Review a movie")]
+    [McpServerPrompt(Name = "review_movie", Title = "Review a movie", IconSource = ItemIcons.Review)]
     public static partial GetPromptResult ReviewMovie(
         string movieTitle,
         string authorName)

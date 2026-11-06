@@ -24,12 +24,12 @@ The SDK finds every class in the assembly (`WithToolsFromAssembly`, `WithResourc
 ## Steps
 
 1. Add the use case first (`add-a-use-case`).
-2. Pick the kind: a tool when the model should decide to call it, a resource when the client reads a known thing by id, a prompt when a person starts a task.
+2. Pick the kind: a tool when the model should decide to call it, a resource when the client reads a known thing by id or a fixed list such as `movies://top-rated`, a prompt when a person starts a task.
 3. Choose the name, title and annotations for a tool (`api-conventions`).
 4. Write the method with `sender` and `cancellationToken` first, then required inputs, then optional ones with defaults.
 5. Document it: `<summary>` saying what it does, what it returns and which tool to call first; a `<param>` for every input except `sender` and the token, with allowed values and where to find ids. Put the XML comment above the attributes.
 6. Return a result model from `src/Presentation/Models/` (records with `[property: Description]`, because the output schema reads attributes), mapped in `ResultMapper`. Add new models to `AppJsonSerializerContext` (`json-serialization`).
-7. A prompt argument that names a movie or author gets suggestions from `Completions/CompletionHandler.cs`; add its name there.
+7. A prompt argument that names a movie or author gets suggestions from `Completions/CompletionHandler.cs`; add its name there. So does the id in a resource template, which suggests ids by their first characters or the title or name they belong to.
 8. Update the server instructions in `WebApplicationBuilderExtensions` if the model needs to know the new thing exists (`api-conventions`).
 9. Test it twice: a unit test calling the static method with a faked `ISender` (`tests/Presentation.Tests.Unit/Tools/`), and an integration test through the MCP client (`presentation-integration-tests`). Add a tool to the list in `ToolListTests`.
 
