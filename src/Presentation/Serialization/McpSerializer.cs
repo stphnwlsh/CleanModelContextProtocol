@@ -21,7 +21,7 @@ public static class McpSerializer
         var options = new JsonSerializerOptions(McpJsonUtilities.DefaultOptions)
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            DefaultIgnoreCondition = JsonIgnoreCondition.Never
         };
         options.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
         options.MakeReadOnly();

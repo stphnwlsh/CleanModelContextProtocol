@@ -1,6 +1,8 @@
 namespace CleanModelContextProtocol.Presentation.Tests.Integration.Tools;
 
+using System.Text.Json;
 using ModelContextProtocol;
+using ModelContextProtocol.Protocol;
 using Presentation.Models;
 using Shouldly;
 using Xunit;
@@ -53,6 +55,20 @@ public class MovieToolTests : BaseToolTests
 
         // Assert
         titles.Count.ShouldBe(50);
+    }
+
+    [Fact]
+    public async Task SearchMovies_ShouldWrite_NullNextOffset_OnTheLastPage()
+    {
+        // Arrange
+        var arguments = new Dictionary<string, object?> { ["query"] = "no movie has this title" };
+
+        // Act
+        var result = await this.Client.CallToolAsync("movies_search", arguments);
+
+        // Assert
+        result.Content.OfType<TextContentBlock>().First().Text.ShouldContain("\"nextOffset\":null");
+        result.StructuredContent.ShouldNotBeNull().GetProperty("nextOffset").ValueKind.ShouldBe(JsonValueKind.Null);
     }
 
     [Fact]

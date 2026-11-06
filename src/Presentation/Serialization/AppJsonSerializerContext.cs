@@ -9,7 +9,6 @@ using Presentation.Models;
 /// </summary>
 [JsonSourceGenerationOptions(
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
-    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     PropertyNameCaseInsensitive = true,
     WriteIndented = false,
     GenerationMode = JsonSourceGenerationMode.Default)]

@@ -9,7 +9,7 @@ metadata:
 
 ## The rule
 
-Tool arguments, tool results, resources and prompt attachments all use one set of options: `McpSerializer.Options` in `src/Presentation/Serialization/McpSerializer.cs`. It starts from the SDK's `McpJsonUtilities.DefaultOptions`, then sets camelCase names and leaves nulls out, and puts `AppJsonSerializerContext` first in the resolver chain so the listed types use generated code. The options are read-only once built.
+Tool arguments, tool results, resources and prompt attachments all use one set of options: `McpSerializer.Options` in `src/Presentation/Serialization/McpSerializer.cs`. It starts from the SDK's `McpJsonUtilities.DefaultOptions`, then sets camelCase names and writes nulls, because tool output schemas list nullable fields such as `nextOffset` as required and strict clients reject a result that leaves them out, and puts `AppJsonSerializerContext` first in the resolver chain so the listed types use generated code. The options are read-only once built.
 
 | Used by | How |
 | --- | --- |
@@ -35,7 +35,7 @@ Results are trees. A review inside a movie carries the movie's id and title, not
 var options = new JsonSerializerOptions(McpJsonUtilities.DefaultOptions)
 {
     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    DefaultIgnoreCondition = JsonIgnoreCondition.Never
 };
 options.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 options.MakeReadOnly();
