@@ -48,7 +48,7 @@ docker compose up -d --build
 dotnet test
 ```
 
-Then open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) at <http://localhost:6274>. It's already pointed at the server at <http://localhost:8080/mcp>, so flip the switch to connect and open **Tools**.
+Then open the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) at <http://localhost:8725>. It's already pointed at the server at <http://localhost:8720/mcp>, so flip the switch to connect and open **Tools**.
 
 The server is open unless you create it with `--include-auth --authority` (and usually `--audience`), and then `/mcp` asks for a bearer token and publishes protected resource metadata so clients can sign in. Leave `--include-auth` out and there's no auth code at all.
 

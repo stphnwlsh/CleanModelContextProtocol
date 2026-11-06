@@ -7,7 +7,7 @@ services:
         VERSION_PREFIX: 1.0.0.0
         VERSION_SUFFIX: docker
     ports:
-      - "8080:8080"
+      - "8720:8080"
     environment:
       DOTNET_ENVIRONMENT: docker
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
@@ -21,8 +21,11 @@ services:
   inspector:
     image: ghcr.io/modelcontextprotocol/inspector:2.13.0
     command: ["--web", "--transport", "http", "--server-url", "http://api:8080/mcp"]
+    environment:
+      # The Inspector only accepts calls from the origin it listens on, so it listens on the same port inside and out.
+      CLIENT_PORT: "8725"
     ports:
-      - "127.0.0.1:6274:6274"
+      - "127.0.0.1:8725:8725"
     networks:
       - cleanmodelcontextprotocol_network
     depends_on:
@@ -32,8 +35,8 @@ services:
     volumes:
       - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
     ports:
-      - "4317:4317"
-      - "4318:4318"
+      - "8723:4317"
+      - "8724:4318"
     networks:
       - cleanmodelcontextprotocol_network
     depends_on:
@@ -41,7 +44,7 @@ services:
   aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6.2
     ports:
-      - "18888:18888"
+      - "8722:18888"
     environment:
       ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
     networks:
@@ -53,7 +56,7 @@ services:
     profiles:
       - demo
     ports:
-      - "127.0.0.1:3000:8080"
+      - "127.0.0.1:8726:8080"
     environment:
       # Kilo's free gateway takes no API key, and a dummy one gets a 401.
       OPENAI_API_BASE_URL: https://api.kilo.ai/api/gateway
