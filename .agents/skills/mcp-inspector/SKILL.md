@@ -26,6 +26,10 @@ metadata:
 5. Find the tool call in the Aspire dashboard if something looks wrong: its trace shows the tool, the use case and each SQL command, and its logs sit beside it (`telemetry`).
 6. With authentication on, the Inspector needs a token from your authority. Leave `Authentication:Authority` empty for local checks.
 
+## Chat demo
+
+To try the tools the way a model does, add the optional `demo` profile: `docker compose --profile demo up -d --build`. It starts [Open WebUI](https://github.com/open-webui/open-webui) at <http://localhost:3000>, already connected to the server and using Kilo's free gateway as the model, with no account or key. It's online only, and your prompts and tool results go to Kilo, a third party, so use it with sample data. Plain `docker compose up` doesn't start it, and solutions created with `--include-auth` leave it out, because Open WebUI has no token to send.
+
 ## Don't
 
 - Expose port 6274 beyond `127.0.0.1`. The Inspector can call every tool.
