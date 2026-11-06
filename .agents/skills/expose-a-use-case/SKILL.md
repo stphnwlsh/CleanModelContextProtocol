@@ -24,7 +24,7 @@ The SDK finds every class in the assembly (`WithToolsFromAssembly`, `WithResourc
 ## Steps
 
 1. Add the use case first (`add-a-use-case`).
-2. Pick the kind: a tool when the model should decide to call it, a resource when the client reads a known thing by id, a prompt when a person starts a task.
+2. Pick the kind: a tool when the model should decide to call it, a resource when the client reads a known thing by id or a fixed list such as `movies://top-rated`, a prompt when a person starts a task.
 3. Choose the name, title and annotations for a tool (`api-conventions`).
 4. Write the method with `sender` and `cancellationToken` first, then required inputs, then optional ones with defaults.
 5. Document it: `<summary>` saying what it does, what it returns and which tool to call first; a `<param>` for every input except `sender` and the token, with allowed values and where to find ids. Put the XML comment above the attributes.
