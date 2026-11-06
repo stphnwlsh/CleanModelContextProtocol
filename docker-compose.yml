@@ -7,7 +7,7 @@ services:
         VERSION_PREFIX: 1.0.0.0
         VERSION_SUFFIX: docker
     ports:
-      - "8720:8080"
+      - "7320:7320"
     environment:
       DOTNET_ENVIRONMENT: docker
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
@@ -20,12 +20,12 @@ services:
       - otel-collector
   inspector:
     image: ghcr.io/modelcontextprotocol/inspector:2.13.0
-    command: ["--web", "--transport", "http", "--server-url", "http://api:8080/mcp"]
+    command: ["--web", "--transport", "http", "--server-url", "http://api:7320/mcp"]
     environment:
       # The Inspector only accepts calls from the origin it listens on, so it listens on the same port inside and out.
-      CLIENT_PORT: "8725"
+      CLIENT_PORT: "7325"
     ports:
-      - "127.0.0.1:8725:8725"
+      - "127.0.0.1:7325:7325"
     networks:
       - cleanmodelcontextprotocol_network
     depends_on:
@@ -35,8 +35,8 @@ services:
     volumes:
       - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
     ports:
-      - "8723:4317"
-      - "8724:4318"
+      - "7323:4317"
+      - "7324:4318"
     networks:
       - cleanmodelcontextprotocol_network
     depends_on:
@@ -44,7 +44,7 @@ services:
   aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:13.6.2
     ports:
-      - "8722:18888"
+      - "7322:18888"
     environment:
       ASPIRE_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: "true"
     networks:
@@ -56,14 +56,14 @@ services:
     profiles:
       - demo
     ports:
-      - "127.0.0.1:8726:8080"
+      - "127.0.0.1:7326:8080"
     environment:
       # Kilo's free gateway takes no API key, and a dummy one gets a 401.
       OPENAI_API_BASE_URL: https://api.kilo.ai/api/gateway
       DEFAULT_MODELS: kilo-auto/free
       ENABLE_OLLAMA_API: "False"
       WEBUI_AUTH: "False"
-      TOOL_SERVER_CONNECTIONS: '[{"url":"http://api:8080/mcp","path":"","type":"mcp","auth_type":"none","key":"","config":{"enable":true},"info":{"id":"mcp","name":"MCP server"}}]'
+      TOOL_SERVER_CONNECTIONS: '[{"url":"http://api:7320/mcp","path":"","type":"mcp","auth_type":"none","key":"","config":{"enable":true},"info":{"id":"mcp","name":"MCP server"}}]'
       # Turns the MCP server on in every chat, and leaves out Open WebUI's own tools so the model only sees ours.
       DEFAULT_MODEL_METADATA: '{"toolIds":["server:mcp:mcp"],"capabilities":{"builtin_tools":false}}'
       # These two skip the embedding model download from Hugging Face on first start.

@@ -5,7 +5,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "https://localhost:8721;http://localhost:8720",
+      "applicationUrl": "https://localhost:7321;http://localhost:7320",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "local"
       }
