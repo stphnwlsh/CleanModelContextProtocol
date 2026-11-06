@@ -42,6 +42,17 @@ To shut the containers down:
 docker compose down
 ```
 
+
+### Chat demo
+
+Want to ask for things in plain English? The optional `demo` profile adds [Open WebUI](https://github.com/open-webui/open-webui), already connected to the server:
+
+``` bash
+docker compose --profile demo up -d --build
+```
+
+Open <http://localhost:3000>, dismiss the release notes and ask it to list the movies. It uses Kilo's free gateway as the model, so there's no account or key, but it only works online, and your prompts and tool results go to Kilo, a third party. Keep it to sample data. Solutions created with `--include-auth` leave it out, because Open WebUI has no token to send. Stop it with `docker compose --profile demo down`.
+
 ## Telemetry
 
 The app always collects [OpenTelemetry](https://opentelemetry.io) traces and metrics, and exports them, along with its logs, only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. Every other standard `OTEL_*` variable works too, such as `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_PROTOCOL` and `OTEL_EXPORTER_OTLP_HEADERS`, so sending it to Grafana, Honeycomb, Seq or a collector is a settings change.
