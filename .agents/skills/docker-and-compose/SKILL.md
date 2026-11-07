@@ -40,8 +40,6 @@ Every port published on the developer's machine, by the compose file or by `laun
 
 `docs/RUN.md` lists the ports this solution uses. The app listens on its own port everywhere: under `dotnet run`, in the image (the `Dockerfile` sets `ASPNETCORE_HTTP_PORTS`, `EXPOSE` and the `HEALTHCHECK` to it) and in the compose file, so `docker run -p` maps it to the same number. Change all four together. The Lambda template is the one exception: Lambda's runtime interface emulator always listens on 8080 inside its container, so only the host side of its mapping is ours. The dashboard, the collector and other third-party images keep their usual ports inside (18888, 4317 and 4318), and only the host side of their mappings moves. A new service takes a spare port from the block, never a product's well-known one such as 3000, 5432 or 9000. `docker compose port <service> <container port>` prints where a port ended up.
 
-The `demo` profile adds Open WebUI for a chat over the tools (`mcp-inspector`). Keep it behind the profile so plain `docker compose up` stays the same. Solutions generated with authentication on leave it out.
-
 ## Steps
 
 1. Keep restore before `COPY . .` so a code change doesn't redo the restore layer. A new project folder needs nothing extra; the loops pick up every `src/*/*.csproj` and `tests/*/*.csproj`.
