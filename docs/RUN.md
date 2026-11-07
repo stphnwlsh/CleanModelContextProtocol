@@ -21,20 +21,20 @@ dotnet ef migrations add <Name> --project ./src/Infrastructure --output-dir Data
 dotnet run --project ./src/Presentation
 ```
 
-It listens on <https://localhost:8081>, and on <http://localhost:8080>, which redirects there. If your browser or `curl` doesn't trust the .NET development certificate yet, run `dotnet dev-certs https --trust` once.
+It listens on <https://localhost:7321>, and on <http://localhost:7320>, which redirects there. If your browser or `curl` doesn't trust the .NET development certificate yet, run `dotnet dev-certs https --trust` once.
 
 ## Docker Compose
 
-`docker-compose.yml` starts the app, the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) already pointed at it, and the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone), which shows its logs, traces and metrics. The app sends everything to an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/), and the collector forwards it to the dashboard, the same shape as a production setup. The dashboard is only a container that receives OTLP; nothing in the solution depends on Aspire. The dashboard has no login and the collector accepts OTLP from anyone on ports 4317 and 4318. That's on purpose for a developer's machine, so don't run this compose file anywhere other people can reach.
+`docker-compose.yml` starts the app, the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) already pointed at it, and the [Aspire dashboard](https://learn.microsoft.com/dotnet/aspire/fundamentals/dashboard/standalone), which shows its logs, traces and metrics. The app sends everything to an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/), and the collector forwards it to the dashboard, the same shape as a production setup. The dashboard is only a container that receives OTLP; nothing in the solution depends on Aspire. The dashboard has no login and the collector accepts OTLP from anyone on ports 7323 and 7324. That's on purpose for a developer's machine, so don't run this compose file anywhere other people can reach.
 
 ``` bash
 docker compose up -d --build
 ```
 
-- App: <http://localhost:8080/mcp> (MCP endpoint, Streamable HTTP)
-- MCP Inspector: <http://localhost:6274>. Flip the switch on the server card to connect, then open **Tools** to see every tool with its description and input schema and run it.
-- Aspire dashboard: <http://localhost:18888>
-- Health checks: <http://localhost:8080/health/live> (the process is up) and <http://localhost:8080/health/ready> (the database can be reached). Both answer without a token. The image's `HEALTHCHECK` uses the live one.
+- App: <http://localhost:7320/mcp> (MCP endpoint, Streamable HTTP)
+- MCP Inspector: <http://localhost:7325>. Flip the switch on the server card to connect, then open **Tools** to see every tool with its description and input schema and run it.
+- Aspire dashboard: <http://localhost:7322>
+- Health checks: <http://localhost:7320/health/live> (the process is up) and <http://localhost:7320/health/ready> (the database can be reached). Both answer without a token. The image's `HEALTHCHECK` uses the live one.
 
 The container runs as the image's non-root `app` user.
 
@@ -53,7 +53,23 @@ Want to ask for things in plain English? The optional `demo` profile adds [Open 
 docker compose --profile demo up -d --build
 ```
 
-Open <http://localhost:3000>, dismiss the release notes and ask it to list the movies. It uses Kilo's free gateway as the model, so there's no account or key, but it only works online, and your prompts and tool results go to Kilo, a third party. Keep it to sample data. Solutions created with `--include-auth` leave it out, because Open WebUI has no token to send. Stop it with `docker compose --profile demo down`.
+Open <http://localhost:7326>, dismiss the release notes and ask it to list the movies. It uses Kilo's free gateway as the model, so there's no account or key, but it only works online, and your prompts and tool results go to Kilo, a third party. Keep it to sample data. Solutions created with `--include-auth` leave it out, because Open WebUI has no token to send. Stop it with `docker compose --profile demo down`.
+
+## Ports
+
+Every Lean Mean Clean template has its own block of ten ports on your machine, so this solution runs beside one made from another template without a clash. This one uses 7320 to 7329:
+
+| Port | What listens |
+| --- | --- |
+| 7320 | The app over HTTP, from Docker Compose or `dotnet run` |
+| 7321 | The app over HTTPS, `dotnet run` only |
+| 7322 | The Aspire dashboard |
+| 7323 | The OpenTelemetry Collector, OTLP over gRPC |
+| 7324 | The OpenTelemetry Collector, OTLP over HTTP |
+| 7325 | The MCP Inspector |
+| 7326 | The chat demo |
+
+The app listens on 7320 everywhere: under `dotnet run`, inside its container and on your machine, so `docker run -p 7320:7320` works the same way. The dashboard and collector keep their usual ports inside their containers. To move the app, change `applicationUrl` in `launchSettings.json`, `ASPNETCORE_HTTP_PORTS`, `EXPOSE` and the `HEALTHCHECK` in the `Dockerfile`, and its mapping in `docker-compose.yml`. When you deploy the image, point the platform's target port at 7320. The Inspector also listens on 7325 inside its container, because it only accepts calls from the origin it listens on. 7327 to 7329 are spare for anything you add.
 
 ## Telemetry
 
@@ -65,14 +81,14 @@ To see a `dotnet run` in the dashboard, start the collector and the dashboard, a
 
 ``` bash
 docker compose up -d otel-collector
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 dotnet run --project ./src/Presentation
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:7323 dotnet run --project ./src/Presentation
 ```
 
 Every span, metric and log carries `service.version`, so you can always tell which build sent it.
 
 ## HTTPS
 
-The app redirects HTTP to HTTPS whenever it has an HTTPS port, which is why `dotnet run` sends <http://localhost:8080> on to <https://localhost:8081>. Outside the `local` and `Development` environments it also sends an HSTS header. The container only listens on HTTP, so in production put it behind a proxy or load balancer that ends TLS, and set `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` so the app knows the original request was HTTPS.
+The app redirects HTTP to HTTPS whenever it has an HTTPS port, which is why `dotnet run` sends <http://localhost:7320> on to <https://localhost:7321>. Outside the `local` and `Development` environments it also sends an HSTS header. The container only listens on HTTP, so in production put it behind a proxy or load balancer that ends TLS, and set `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` so the app knows the original request was HTTPS.
 
 ## Tests
 
