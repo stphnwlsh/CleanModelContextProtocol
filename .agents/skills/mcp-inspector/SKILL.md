@@ -30,10 +30,13 @@ metadata:
 
 To try the tools the way a model does, add the optional `demo` profile: `docker compose --profile demo up -d --build`. It starts [Open WebUI](https://github.com/open-webui/open-webui) at <http://localhost:7326>, already connected to the server and using Kilo's free gateway as the model, with no account or key. It's online only, and your prompts and tool results go to Kilo, a third party, so use it with sample data. Plain `docker compose up` doesn't start it, and solutions created with `--include-auth` leave it out, because Open WebUI has no token to send.
 
+In the template repository, `docker-compose.yml` wraps the `chat` service and its volume in conditional blocks for the authentication toggle, which `dotnet new` resolves. Describe them in shipped files without naming the toggle's symbol, because Verify Template fails if it survives in a generated solution (`template-authoring`).
+
 ## Don't
 
 - Expose port 7325 beyond `127.0.0.1`. The Inspector can call every tool.
 - Use `latest` for the Inspector image. Change the pinned version on purpose.
+- Start the chat demo without its profile. Plain `docker compose up` stays the server, the Inspector and the telemetry stack.
 - Treat a manual check as a test. Write the integration test as well (`presentation-integration-tests`).
 
 ## Check
